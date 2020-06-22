@@ -9,8 +9,8 @@ rm(list=ls())
 
 #read in data
 
-dat <- dir(path = "./BV_concentration/Pelagic/Site_50_QAQC", pattern = paste0(".csv")) %>% 
-  map_df(~ read_csv(file.path(path = "./BV_concentration/Pelagic/Site_50_QAQC", .), col_types = cols(.default = "c")))
+dat <- dir(path = "C:/Users/Mary Lofton/Dropbox/Ch_2/BV_concentration/Pelagic/Site_50_QAQC", pattern = paste0(".csv")) %>% 
+  map_df(~ read_csv(file.path(path = "C:/Users/Mary Lofton/Dropbox/Ch_2/BV_concentration/Pelagic/Site_50_QAQC", .), col_types = cols(.default = "c")))
 
 dat1 <- dat %>% 
   mutate(BV_um3mL = as.double(BV_um3mL)) %>%
@@ -43,4 +43,4 @@ dat2 <- dat1 %>%
 dat3 <- dat2[c(6,2,1,3,4,5)] %>%
   arrange(Date)
 
-write.csv(dat3, file = "./EDI_phytos/phytoplankton.csv",row.names = FALSE)
+write.csv(dat3, file = "./00_Data_files/EDI_phytos/phytoplankton.csv",row.names = FALSE)
