@@ -32,6 +32,7 @@ dat1 <- dat %>%
   mutate(Genus = ifelse(Genus == "Dicytosphaerium" | Genus == "Dictyospaerium" | Genus == "Dicytospherium","Dictyosphaerium",Genus)) %>%
   mutate(Genus = ifelse(Genus == "Euglenoid/Cryptomonoid" | Genus == "Euglenoid/Cryptomonoid 2" | Genus == "Cryptophyte","Cryptomonas",Genus)) %>%
   mutate(Sample_date = ifelse(Sample_date == "7/10/2017","2017-07-10",Sample_date)) %>%
+  mutate(Sample_date = ifelse(Sample_date == "2019-10-18","2019-10-16",Sample_date)) %>%
   filter(!Genus == "unknown")
 
 dat1$Reservoir <- "FCR"

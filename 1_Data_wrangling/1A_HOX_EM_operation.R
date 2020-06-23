@@ -45,6 +45,8 @@
 #load packages
 #install.packages('pacman')
 pacman::p_load(tidyverse, lubridate)
+rm(list=ls())
+
 
 #vector of EM operation dates
 EM_dates <- as.Date(c("2016-05-30", "2016-06-06","2016-06-13","2016-06-27",
