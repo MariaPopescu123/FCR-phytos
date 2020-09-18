@@ -30,6 +30,7 @@ dat1 <- dat %>%
   mutate(Genus = ifelse(Genus == "Aphanothece" ,"Aphanocapsa",Genus)) %>%
   mutate(Genus = ifelse(Genus == "Dolichosphermum","Dolichospermum",Genus)) %>%
   mutate(Genus = ifelse(Genus == "Dysmorphococcus","Gloeodinium",Genus)) %>%
+  mutate(Genus = ifelse(Genus == "Selenastrium","Selenastrum",Genus)) %>%
   mutate(Genus = ifelse(Genus == "dinoflagellate cyst","Prorocentrum",Genus)) %>%
   mutate(Genus = ifelse(Genus == "Dicytosphaerium" | Genus == "Dictyospaerium" | Genus == "Dicytospherium","Dictyosphaerium",Genus)) %>%
   mutate(Genus = ifelse(Genus == "Euglenoid/Cryptomonoid" | Genus == "Euglenoid/Cryptomonoid 2" | Genus == "Cryptophyte","Cryptomonas",Genus)) %>%
