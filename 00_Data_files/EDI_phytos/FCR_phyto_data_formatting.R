@@ -20,10 +20,12 @@ dat1 <- dat %>%
   mutate(Genus = ifelse(Genus == "Chlorophyte spp. 3" | Genus == "unicell Chlorophyte spp. 3","Chlorophyte sp. 3",Genus)) %>%
   mutate(Genus = ifelse(Genus == "unicell Chlorophyte spp. 4","Chlorophyte sp. 4",Genus)) %>%
   mutate(Genus = ifelse(Genus == "chlorophyte spp. 5","Chlorophyte sp. 5",Genus)) %>%
+  mutate(Genus = ifelse(Genus == "Euglena?","Euglena",Genus)) %>%
+  mutate(Genus = ifelse(Genus == "Desmid spp. 1","Desmid sp. 1",Genus)) %>%
   mutate(Genus = ifelse(Genus == "filament" | Genus == "Psuedanabaena" | Genus == "Pseduanabaena","Pseudanabaena",Genus)) %>%
-  mutate(Genus = ifelse(Genus == "dinoflagellate" | Genus == "Gymnodinium?" | Genus == "Gymnodinium??" | Genus == "Gymnodinuim" | Genus == "Gymnodinum" | Genus == "Gymnodinium","Parvodinium",Genus)) %>%
+  mutate(Genus = ifelse(Genus == "dinoflagellate" | Genus == "Gymnodinium?" | Genus == "Gymnodinium??" | Genus == "Gymnodinuim" | Genus == "Gymnodinum" | Genus == "Gymnodinium" | Genus == "naked dino","Parvodinium",Genus)) %>%
   mutate(Genus = ifelse(Genus == "Mononastix","Monomastix",Genus)) %>%
-  mutate(Genus = ifelse(Genus == "Woronchinia","Woronichinia",Genus)) %>%
+  mutate(Genus = ifelse(Genus == "Woronchinia" | Genus == "Woronochinia","Woronichinia",Genus)) %>%
   mutate(Genus = ifelse(Genus == "Ankistodesmus" ,"Ankistrodesmus",Genus)) %>%
   mutate(Genus = ifelse(Genus == "Aphanothece" ,"Aphanocapsa",Genus)) %>%
   mutate(Genus = ifelse(Genus == "Dolichosphermum","Dolichospermum",Genus)) %>%
@@ -37,11 +39,15 @@ dat1 <- dat %>%
 
 dat1$Reservoir <- "FCR"
 
-dat2 <- dat1 %>% 
+dat2 <- dat1 %>%
+  group_by(Reservoir, Site, Sample_date, Genus, Depth) %>%
+  summarize(BV_um3mL = sum(BV_um3mL, na.rm = TRUE))
+
+dat3 <- dat2 %>% 
   rename(Date = Sample_date,
          Depth_m = Depth)
 
-dat3 <- dat2[c(6,2,1,3,4,5)] %>%
+dat4 <- dat3[c(6,2,1,3,4,5)] %>%
   arrange(Date)
 
 write.csv(dat3, file = "./00_Data_files/EDI_phytos/phytoplankton.csv",row.names = FALSE)

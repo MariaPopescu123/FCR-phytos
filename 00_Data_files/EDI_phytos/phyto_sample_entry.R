@@ -9,7 +9,7 @@ pacman::p_load(readxl, zoo, tidyverse)
 rm(list=ls())
 
 #source shape equations
-source("./RScripts/shape_BV_functions.R")
+source("./00_Data_files/EDI_phytos/shape_BV_functions.R")
 
 #Tasks:
 #1. Enter basic ID information for each sample 
@@ -23,7 +23,7 @@ source("./RScripts/shape_BV_functions.R")
 
 ############################################################
 #needs to be in format yyyy-mm-dd
-Sample_date = "2019-11-20"
+Sample_date = "2016-07-25"
 
 #choose from 50, 45, 20
 Site = 50
@@ -32,31 +32,31 @@ Site = 50
 Sample_type = "P"
 
 #in meters (for pelagic samples only)
-Depth = 5
+Depth = 6
 
 #choose from Y or P (for recruitment samples only)
 Rep = NA
 
 #needs to be in format yyyy-mm-dd
-Count_date = "2020-06-17"
+Count_date = "2020-06-15"
 
 #in mls
 Volume_filtered = 20
 
 #number of grids counted
-n = 16
+n = 8
 
 ############################################################
 
 #Task 2: Calculate biovolume for each genus
 
-dat <- read_xlsx("./Countsheets/Pelagic/Site_50_QAQC/F20NOV19P50_5.xlsx", sheet = "Count") %>%
+dat <- read_xlsx("C:/Users/Mary Lofton/Dropbox/Ch_2/Countsheets/Pelagic/Site_50_QAQC/F25JUL16P50_6.xlsx", sheet = "Count") %>%
   mutate(Field = na.locf(Field),
          Genus = na.locf(Genus),
          Shape = na.locf(Shape),
          Tally = na.locf(Tally))
 
-scan <- read_xlsx("./Countsheets/Pelagic/Site_50_QAQC/F20NOV19P50_5.xlsx", sheet = "Scan") %>%
+scan <- read_xlsx("C:/Users/Mary Lofton/Dropbox/Ch_2/Countsheets/Pelagic/Site_50_QAQC/F25JUL16P50_6.xlsx", sheet = "Scan") %>%
   mutate(Field = na.locf(Field),
          Genus = na.locf(Genus),
          Shape = na.locf(Shape),
@@ -285,7 +285,7 @@ final1$Rep <- Rep
 final1$Count_date <- as.Date(Count_date)
 final1$Sample_type <- Sample_type
 
-write.csv(final1, file = "./BV_concentration/Pelagic/Site_50_QAQC/F20NOV19P50_5.csv", row.names = FALSE)
+write.csv(final1, file = "C:/Users/Mary Lofton/Dropbox/Ch_2/BV_concentration/Pelagic/Site_50_QAQC/F25JUL16P50_6.csv", row.names = FALSE)
 
 
 
