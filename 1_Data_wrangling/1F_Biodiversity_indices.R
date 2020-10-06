@@ -108,3 +108,36 @@ ggplot(data = bd, aes(x = Date, y = jaccard))+
   facet_wrap(vars(Year), scales = "free")+
   geom_line(size = 1)+
   theme_classic()
+
+# autocorrelation
+bd1 <- bd %>%
+  gather(shannon:jaccard, key = "bd_metric", value = "value")
+
+yrs <- unique(bd1$Year)
+bd_metrics <- unique(bd1$bd_metric)
+
+png(file = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/BD_pacf.png",width = 16, height = 16,
+    units = "cm",res = 300)
+par(mfrow = c(4,4), mgp = c(2,0.5,0),mar = c(4,3,3,1))
+
+for (j in 1:length(yrs)){
+  for (k in 1:length(bd_metrics)){
+    
+    mydata <- bd1 %>%
+      filter(Year == yrs[j],
+             bd_metric == bd_metrics[k])
+    
+    myacf <- acf(mydata$value, 
+                 type = "partial",
+                 plot = FALSE,
+                 na.action = na.pass)
+    plot(myacf,main = "")
+    title(c(yrs[j],bd_metrics[k]),line = 1)
+    
+  }
+  
+}
+
+dev.off()
+
+

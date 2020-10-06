@@ -194,3 +194,37 @@ ggplot(cs_plot, aes(x = Date, y = rel_abund, fill = spectral_group)) +
   geom_area(position = 'stack') +
   facet_wrap(vars(Year), scales = "free_x")+
   theme_classic()
+
+# autocorrelation
+cs1 <- cs %>%
+  gather(BV_TOTAL:rel_abund_crypto, key = "cs_metric", value = "value")
+
+yrs <- unique(cs1$Year)
+cs_metrics <- unique(cs1$cs_metric)
+
+png(file = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/CS_pacf.png",width = 36, height = 16,
+    units = "cm",res = 300)
+par(mfrow = c(4,9), mgp = c(2,0.5,0),mar = c(4,3,3,1))
+
+for (j in 1:length(yrs)){
+  for (k in 1:length(cs_metrics)){
+    
+    mydata <- cs1 %>%
+      filter(Year == yrs[j],
+             cs_metric == cs_metrics[k])
+    
+    myacf <- acf(mydata$value, 
+                 type = "partial",
+                 plot = FALSE,
+                 na.action = na.pass)
+    plot(myacf,main = "")
+    title(c(yrs[j],cs_metrics[k]),line = 1)
+    
+  }
+  
+}
+
+dev.off()
+
+
+
