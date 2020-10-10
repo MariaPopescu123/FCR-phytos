@@ -153,6 +153,9 @@ final <- final %>%
 #note there are only 98 rows here but should be ok when left-join to phyto samples
 write.csv(final, "./00_Data_files/FP_DistributionMetrics.csv", row.names = FALSE)
 
+#read data back in
+final <- read_csv("./00_Data_files/FP_DistributionMetrics.csv")
+
 ##PLOTTING
 final1 <- final %>%
   mutate(Date = as.Date(Date),
@@ -172,13 +175,21 @@ vars
 ggsave(vars, filename = "./Exploratory_viz/FP_dist_vars.png",
        height = 5, width = 6, units = "in", device = "png")
 
+final1$Dist_var <- factor(final1$Dist_var, levels = c("Max_biomass_ugL","Peak_depth_m","Peak_magnitude_ugL","Peak_width_m"),
+                   ordered = TRUE, labels=c(expression(paste("Maximum biomass ","(",mu,g,~L^-1,")")),
+                                            expression(paste("Peak depth (m)")), 
+                                            expression(paste("Peak magnitude ","(",mu,g,~L^-1,")")),
+                                            expression(paste("Peak width (m)"))))
+final1$Year <- as.factor(final1$Year)
+
 vars1 <- ggplot(data = final1, aes(x = value, group = Year, color = Year, fill = Year))+
-  facet_wrap(~Dist_var, nrow = 4, scales = "free")+
   geom_density(alpha = 0.5)+
+  facet_wrap(~Dist_var, nrow = 2, scales = "free",labeller = label_parsed)+
+  xlab("")+
   theme_classic()
 vars1
-ggsave(vars1, filename = "./Exploratory_viz/FP_dist_vars_hist.png",
-       height = 5, width = 6, units = "in", device = "png")
+ggsave(vars1, filename = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/FP_dist_vars_hist.png",
+       height = 3, width = 10, units = "in", device = "png")
 
 yrs <- unique(final1$Year)
 dist_vars <- unique(final1$Dist_var)
