@@ -10,7 +10,8 @@ mega <- read_csv("./2_Data_analysis/megamatrix.csv")%>%
   select(Max_biomass_ugL, Peak_depth_m, Peak_magnitude_ugL, Peak_width_m, 
          BV_TOTAL, BV_green, BV_brown, BV_cyano, BV_crypto,
          rel_abund_green,rel_abund_brown,rel_abund_cyano,rel_abund_crypto,
-         shannon, richness, braycurtis,jaccard, Year)
+         shannon, richness, braycurtis,jaccard, Year,Date) %>%
+  filter(!Date %in% as.Date(c("2017-01-19","2017-05-01","2017-05-08","2019-01-21")))
 
 yrs <- c(2016:2019)
 final <- list(y2016 = matrix(NA,nrow = 8, ncol = 4),
@@ -71,36 +72,40 @@ for (i in 1:4){
 mega <- mega %>%
   mutate(Year = as.factor(Year))
 
+rho1 <- cor(mega$Peak_depth_m, mega$rel_abund_cyano, method = "spearman", use = "complete.obs")
 p1 <- ggplot(data = mega, aes(x = Peak_depth_m, y = rel_abund_cyano, group = Year, color = Year, fill = Year))+
   geom_point()+
-  geom_smooth(method = "lm", se=F)+
+  #geom_smooth(method = "lm", se=F)+
   xlab("Peak depth (m)")+
   ylab("Relative abundance of cyanobacteria")+
   theme_classic()
 ggsave(plot = p1, filename = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/peakdepth_v_relabundcyano.png",
        device = "png", height = 4, width = 5, units = "in")
 
+rho2 <- cor(mega$Peak_depth_m, mega$rel_abund_crypto, method = "spearman", use = "complete.obs")
 p2 <- ggplot(data = mega, aes(x = Peak_depth_m, y = rel_abund_crypto, group = Year, color = Year, fill = Year))+
   geom_point()+
-  geom_smooth(method = "lm", se=F)+
+  #geom_smooth(method = "lm", se=F)+
   xlab("Peak depth (m)")+
   ylab("Relative abundance of cryptophytes")+
   theme_classic()
 ggsave(plot = p2, filename = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/peakdepth_v_relabundcrypto.png",
        device = "png", height = 4, width = 5, units = "in")
 
+rho3 <- cor(mega$Peak_magnitude_ugL, mega$richness, method = "spearman", use = "complete.obs")
 p3 <- ggplot(data = mega, aes(x = Peak_magnitude_ugL, y = richness, group = Year, color = Year, fill = Year))+
   geom_point()+
-  stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 1, se = F)+
+  #stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 1, se = F)+
   xlab(expression(paste("Peak magnitude ","(",mu,g,~L^-1,")")))+
   ylab("Species richness")+
   theme_classic()
 ggsave(plot = p3, filename = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/peakmagnitude_v_richness.png",
        device = "png", height = 4, width = 5, units = "in")
 
+rho4 <- cor(mega$Max_biomass_ugL, mega$richness, method = "spearman", use = "complete.obs")
 p4 <- ggplot(data = mega, aes(x = Max_biomass_ugL, y = richness, group = Year, color = Year, fill = Year))+
   geom_point()+
-  stat_smooth(method = "lm", size = 1, se = F)+
+  #stat_smooth(method = "lm", size = 1, se = F)+
   xlab(expression(paste("Maximum biomass ","(",mu,g,~L^-1,")")))+
   ylab("Species richness")+
   theme_classic()

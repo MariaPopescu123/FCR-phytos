@@ -13,6 +13,7 @@
 #7. relative abuandance cyanobacteria
 #8. total abundance cryptophytes
 #9. relative abundance cryptophytes
+#10. relative abundance of divisions
 
 #load packages
 #install.packages('pacman')
@@ -85,6 +86,57 @@ genera <- c(cyano, chloro, baci, chryso, dino, desmid, crypto, eugleno,raphid)
 check <- dat1 %>%
   filter(!Genus %in% genera)
 bad_genera <- unique(check$Genus)
+
+#get relative abundances of divisions
+dat2 <- dat1 %>%
+  filter(Site == 50) %>%
+  mutate(Phyto_group = ifelse(Genus %in% cyano,"Cyanobacteria",
+                              ifelse(Genus %in% chloro,"Chlorophytes",
+                                     ifelse(Genus %in% baci, "Bacillaria",
+                                            ifelse(Genus %in% chryso, "Chrysophytes",
+                                                   ifelse(Genus %in% dino, "Dinoflagellates",
+                                                          ifelse(Genus %in% desmid,"Desmids",
+                                                                 ifelse(Genus %in% crypto, "Cryptophytes",
+                                                                        ifelse(Genus %in% eugleno, "Euglenoids",
+                                                                               ifelse(Genus %in% raphid, "Raphids",""))))))))))
+
+dat3 <- dat2 %>%
+  group_by(Sample_date, Phyto_group) %>%
+  summarize(BV_group = sum(BV_um3mL, na.rm = TRUE)) %>%
+  mutate(Date = as.Date(Sample_date))
+
+dates <- unique(dat3$Date)
+groups <- unique(dat3$Phyto_group)
+combinations <- expand.grid(Date = dates, Phyto_group = groups)
+
+dat4 <- full_join(dat3, combinations, by = c("Date","Phyto_group")) %>%
+  mutate(BV_group = ifelse(is.na(BV_group), 0, BV_group)) 
+
+dat5 <- left_join(dat4, total_bv, by = "Date") %>%
+  mutate(rel_abund_group = BV_group/BV_TOTAL,
+         Year = year(Date))
+
+#PLOTS FOR GLEON POSTER
+p1 <- ggplot(dat5, aes(x = Date, y = rel_abund_group, group = Phyto_group, color = Phyto_group, fill = Phyto_group)) + 
+  geom_area(position = "stack") +
+  facet_wrap(vars(Year), scales = "free_x")+
+  scale_color_brewer(palette = "Set3")+
+  scale_fill_brewer(palette = "Set3")+
+  ylab("Relative abundance")+
+  labs(fill = "Phytoplankton group", color = "Phytoplankton group")+
+  theme_classic()
+ggsave(plot = p1, filename = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/relabund.png",
+       device = "png",height = 4, width = 7, units = "in")
+
+p2 <- ggplot(dat5, aes(x = Date, y = BV_TOTAL)) + 
+  geom_line() +
+  geom_point(size = 2)+
+  facet_wrap(vars(Year), scales = "free_x")+
+  ylab(expression(paste("Biovolume ","(",mu,m^3,~mL^-1,")")))+
+  theme_classic()
+p2
+ggsave(plot = p2, filename = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/BV.png",
+       device = "png",height = 2.5, width = 6, units = "in")
 
 #separate out and summarize count data by spectral group
 green <- dat1 %>% filter(Site == 50 & Genus %in% c(chloro, desmid, eugleno, raphid)) %>%

@@ -191,6 +191,40 @@ vars1
 ggsave(vars1, filename = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/FP_dist_vars_hist.png",
        height = 3, width = 10, units = "in", device = "png")
 
+final2 <- final %>%
+  mutate(Year = as.factor(year(Date)))
+
+vars2 <- ggplot(data = final2, aes(x = Date, y = Peak_depth_m, group = Year, color = Year, fill = Year))+
+  geom_point()+
+  geom_line()+
+  facet_wrap(vars(Year), scales = "free_x")+
+  theme_classic()+
+  scale_y_reverse()+
+  ylab("Peak depth (m)")
+vars2
+ggsave(plot = vars2, filename = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/peakdepth.png",
+       device = "png",height = 3, width = 5, units = "in")
+
+vars3 <- ggplot(data = final2, aes(x = Date, y = Peak_magnitude_ugL, group = Year, color = Year, fill = Year))+
+  geom_point()+
+  geom_line()+
+  facet_wrap(vars(Year), scales = "free_x")+
+  theme_classic()+
+  ylab(expression(paste("Peak magnitude ","(",mu,g,~L^-1,")")))
+vars3
+ggsave(plot = vars3, filename = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/peakmagnitude.png",
+       device = "png",height = 3, width = 5, units = "in")
+
+vars4 <- ggplot(data = final2, aes(x = Date, y = Peak_width_m, group = Year, color = Year, fill = Year))+
+  geom_point()+
+  geom_line()+
+  facet_wrap(vars(Year), scales = "free_x")+
+  theme_classic()+
+  ylab(expression(paste("Peak width (m)")))
+vars4
+ggsave(plot = vars4, filename = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/peakwidth.png",
+       device = "png",height = 3, width = 5, units = "in")
+
 yrs <- unique(final1$Year)
 dist_vars <- unique(final1$Dist_var)
 
@@ -216,4 +250,5 @@ for (j in 1:length(yrs)){
 }
 
 dev.off()
+
 
