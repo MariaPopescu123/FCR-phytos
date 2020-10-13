@@ -13,7 +13,8 @@
 #7. relative abuandance cyanobacteria
 #8. total abundance cryptophytes
 #9. relative abundance cryptophytes
-#10. relative abundance of divisions
+#10. total abundance of divisions/groups
+#11. relative abundance of divisions/groups
 
 #load packages
 #install.packages('pacman')
@@ -116,7 +117,26 @@ dat5 <- left_join(dat4, total_bv, by = "Date") %>%
   mutate(rel_abund_group = BV_group/BV_TOTAL,
          Year = year(Date))
 
-#PLOTS FOR GLEON POSTER
+dat6 <- dat5 %>%
+  ungroup() %>%
+  select(Date, BV_group, Phyto_group) %>%
+  spread(BV_group,key = Phyto_group)
+
+colnames(dat6)[2:10] <- paste("BV", colnames(dat6)[2:10], sep = "_")
+
+dat7 <- dat5 %>%
+  ungroup() %>%
+  select(Date, rel_abund_group, Phyto_group) %>%
+  spread(rel_abund_group,key = Phyto_group)
+
+colnames(dat7)[2:10] <- paste("rel_abund", colnames(dat7)[2:10], sep = "_")
+
+dat8 <- left_join(dat6, dat7, by = "Date")
+dat9 <- left_join(dat8, total_bv, by = "Date")
+
+write.csv(dat9, file = "./00_Data_files/Community_structure.csv",row.names = FALSE)
+
+#plot relative abundance of divisions
 p1 <- ggplot(dat5, aes(x = Date, y = rel_abund_group, group = Phyto_group, color = Phyto_group, fill = Phyto_group)) + 
   geom_area(position = "stack") +
   facet_wrap(vars(Year), scales = "free_x")+
@@ -128,6 +148,7 @@ p1 <- ggplot(dat5, aes(x = Date, y = rel_abund_group, group = Phyto_group, color
 ggsave(plot = p1, filename = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/relabund.png",
        device = "png",height = 4, width = 7, units = "in")
 
+#plot total biovolume over time
 p2 <- ggplot(dat5, aes(x = Date, y = BV_TOTAL)) + 
   geom_line() +
   geom_point(size = 2)+
@@ -138,58 +159,7 @@ p2
 ggsave(plot = p2, filename = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/BV.png",
        device = "png",height = 2.5, width = 6, units = "in")
 
-#separate out and summarize count data by spectral group
-green <- dat1 %>% filter(Site == 50 & Genus %in% c(chloro, desmid, eugleno, raphid)) %>%
-  mutate(BV_um3mL = as.double(BV_um3mL)) %>%
-  arrange(Sample_date) %>%
-  group_by(Sample_date) %>%
-  summarize(BV_green = sum(BV_um3mL, na.rm = TRUE)) %>%
-  mutate(Date = as.Date(Sample_date)) %>%
-  select(-Sample_date)
-
-cyano <- dat1 %>% filter(Site == 50 & Genus %in% cyano) %>%
-  mutate(BV_um3mL = as.double(BV_um3mL)) %>%
-  arrange(Sample_date) %>%
-  group_by(Sample_date) %>%
-  summarize(BV_cyano = sum(BV_um3mL, na.rm = TRUE)) %>%
-  mutate(Date = as.Date(Sample_date))%>%
-  select(-Sample_date)
-
-brown <- dat1 %>% filter(Site == 50 & Genus %in% c(baci, dino, chryso)) %>%
-  mutate(BV_um3mL = as.double(BV_um3mL)) %>%
-  arrange(Sample_date) %>%
-  group_by(Sample_date) %>%
-  summarize(BV_brown = sum(BV_um3mL, na.rm = TRUE)) %>%
-  mutate(Date = as.Date(Sample_date)) %>%
-  select(-Sample_date)
-
-crypto <- dat1 %>% filter(Site == 50 & Genus %in% crypto) %>%
-  mutate(BV_um3mL = as.double(BV_um3mL)) %>%
-  arrange(Sample_date) %>%
-  group_by(Sample_date) %>%
-  summarize(BV_crypto = sum(BV_um3mL, na.rm = TRUE)) %>%
-  mutate(Date = as.Date(Sample_date))%>%
-  select(-Sample_date) 
-
-#joining all spectral groups
-comm <- left_join(total_bv, green, by = "Date")
-comm1 <- left_join(comm, brown, by = "Date")
-comm2 <- left_join(comm1, cyano, by = "Date")
-comm3 <- left_join(comm2, crypto, by = "Date")
-comm3[is.na(comm3)] <- 0
-
-#calculate relative abundance
-comm4 <- comm3 %>%
-  mutate(rel_abund_green = BV_green/BV_TOTAL,
-         rel_abund_brown = BV_brown/BV_TOTAL,
-         rel_abund_cyano = BV_cyano/BV_TOTAL,
-         rel_abund_crypto = BV_crypto/BV_TOTAL)
-
-comm5 <- comm4[,c(2,1,3:10)]
-
-write.csv(comm5, "./00_Data_files/Community_structure.csv", row.names = FALSE)
-
-#visualization
+#further visualization
 cs <- read_csv("./00_Data_files/Community_structure.csv") %>%
   mutate(Year = year(Date))
 
@@ -198,65 +168,107 @@ ggplot(data = cs, aes(x = Date, y = BV_TOTAL))+
   geom_line(size = 1)+
   theme_classic()
 
-ggplot(data = cs, aes(x = Date, y = BV_green))+
+ggplot(data = cs, aes(x = Date, y = BV_Bacillaria))+
   facet_wrap(vars(Year), scales = "free_x")+
   geom_line(size = 1)+
   theme_classic()
 
-ggplot(data = cs, aes(x = Date, y = BV_brown))+
+ggplot(data = cs, aes(x = Date, y = BV_Chlorophytes))+
   facet_wrap(vars(Year), scales = "free_x")+
   geom_line(size = 1)+
   theme_classic()
 
-ggplot(data = cs, aes(x = Date, y = BV_cyano))+
+ggplot(data = cs, aes(x = Date, y = BV_Chrysophytes))+
   facet_wrap(vars(Year), scales = "free_x")+
   geom_line(size = 1)+
   theme_classic()
 
-ggplot(data = cs, aes(x = Date, y = BV_crypto))+
+ggplot(data = cs, aes(x = Date, y = BV_Cryptophytes))+
   facet_wrap(vars(Year), scales = "free_x")+
   geom_line(size = 1)+
   theme_classic()
 
-ggplot(data = cs, aes(x = Date, y = rel_abund_green))+
+ggplot(data = cs, aes(x = Date, y = BV_Cyanobacteria))+
   facet_wrap(vars(Year), scales = "free_x")+
   geom_line(size = 1)+
   theme_classic()
 
-ggplot(data = cs, aes(x = Date, y = rel_abund_brown))+
+ggplot(data = cs, aes(x = Date, y = BV_Desmids))+
   facet_wrap(vars(Year), scales = "free_x")+
   geom_line(size = 1)+
   theme_classic()
 
-ggplot(data = cs, aes(x = Date, y = rel_abund_cyano))+
+ggplot(data = cs, aes(x = Date, y = BV_Dinoflagellates))+
   facet_wrap(vars(Year), scales = "free_x")+
   geom_line(size = 1)+
   theme_classic()
 
-ggplot(data = cs, aes(x = Date, y = rel_abund_crypto))+
+ggplot(data = cs, aes(x = Date, y = BV_Euglenoids))+
   facet_wrap(vars(Year), scales = "free_x")+
   geom_line(size = 1)+
   theme_classic()
 
-cs_plot <- cs %>%
-  select(Year, Date, rel_abund_green:rel_abund_crypto)%>%
-  gather(rel_abund_green:rel_abund_crypto, key = spectral_group, value = rel_abund)
-
-ggplot(cs_plot, aes(x = Date, y = rel_abund, fill = spectral_group)) + 
-  geom_area(position = 'stack') +
+ggplot(data = cs, aes(x = Date, y = BV_Raphids))+
   facet_wrap(vars(Year), scales = "free_x")+
+  geom_line(size = 1)+
+  theme_classic()
+
+ggplot(data = cs, aes(x = Date, y = rel_abund_Bacillaria))+
+  facet_wrap(vars(Year), scales = "free_x")+
+  geom_line(size = 1)+
+  theme_classic()
+
+ggplot(data = cs, aes(x = Date, y = rel_abund_Chlorophytes))+
+  facet_wrap(vars(Year), scales = "free_x")+
+  geom_line(size = 1)+
+  theme_classic()
+
+ggplot(data = cs, aes(x = Date, y = rel_abund_Chrysophytes))+
+  facet_wrap(vars(Year), scales = "free_x")+
+  geom_line(size = 1)+
+  theme_classic()
+
+ggplot(data = cs, aes(x = Date, y = rel_abund_Cryptophytes))+
+  facet_wrap(vars(Year), scales = "free_x")+
+  geom_line(size = 1)+
+  theme_classic()
+
+ggplot(data = cs, aes(x = Date, y = rel_abund_Cyanobacteria))+
+  facet_wrap(vars(Year), scales = "free_x")+
+  geom_line(size = 1)+
+  theme_classic()
+
+ggplot(data = cs, aes(x = Date, y = rel_abund_Desmids))+
+  facet_wrap(vars(Year), scales = "free_x")+
+  geom_line(size = 1)+
+  theme_classic()
+
+ggplot(data = cs, aes(x = Date, y = rel_abund_Dinoflagellates))+
+  facet_wrap(vars(Year), scales = "free_x")+
+  geom_line(size = 1)+
+  theme_classic()
+
+ggplot(data = cs, aes(x = Date, y = rel_abund_Euglenoids))+
+  facet_wrap(vars(Year), scales = "free_x")+
+  geom_line(size = 1)+
+  theme_classic()
+
+ggplot(data = cs, aes(x = Date, y = rel_abund_Raphids))+
+  facet_wrap(vars(Year), scales = "free_x")+
+  geom_line(size = 1)+
   theme_classic()
 
 # autocorrelation
 cs1 <- cs %>%
-  gather(BV_TOTAL:rel_abund_crypto, key = "cs_metric", value = "value")
+  select(Date:BV_Dinoflagellates, BV_TOTAL,Year) %>%
+  gather(BV_Bacillaria:BV_TOTAL, key = "cs_metric", value = "value")
 
 yrs <- unique(cs1$Year)
 cs_metrics <- unique(cs1$cs_metric)
 
-png(file = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/CS_pacf.png",width = 36, height = 16,
+png(file = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/CS_pacf1.png",width = 36, height = 16,
     units = "cm",res = 300)
-par(mfrow = c(4,9), mgp = c(2,0.5,0),mar = c(4,3,3,1))
+par(mfrow = c(4,8), mgp = c(2,0.5,0),mar = c(4,3,3,1))
 
 for (j in 1:length(yrs)){
   for (k in 1:length(cs_metrics)){
@@ -277,6 +289,40 @@ for (j in 1:length(yrs)){
 }
 
 dev.off()
+
+#autocorrelation for relative abundance
+cs2 <- cs %>%
+  select(Date,rel_abund_Bacillaria:rel_abund_Dinoflagellates,Year) %>%
+  gather(rel_abund_Bacillaria:rel_abund_Dinoflagellates, key = "cs_metric", value = "value")
+
+yrs <- unique(cs2$Year)
+cs_metrics <- unique(cs2$cs_metric)
+
+png(file = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/CS_pacf2.png",width = 36, height = 16,
+    units = "cm",res = 300)
+par(mfrow = c(4,7), mgp = c(2,0.5,0),mar = c(4,3,3,1))
+
+for (j in 1:length(yrs)){
+  for (k in 1:length(cs_metrics)){
+    
+    mydata <- cs2 %>%
+      filter(Year == yrs[j],
+             cs_metric == cs_metrics[k])
+    
+    myacf <- acf(mydata$value, 
+                 type = "partial",
+                 plot = FALSE,
+                 na.action = na.pass)
+    plot(myacf,main = "")
+    title(c(yrs[j],cs_metrics[k]),line = 1)
+    
+  }
+  
+}
+
+dev.off()
+
+
 
 
 
