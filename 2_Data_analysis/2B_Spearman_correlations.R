@@ -2,6 +2,9 @@
 #Author: Mary Lofton
 #Date: 06OCT20
 
+#NEED TO GO BACK THROUGH THIS AND ELIMINATE DATES WHERE THE PEAK_DEPTH_M IS 
+#MORE THAN 1.2 M FROM THE PHYTO SAMPLE!!
+
 library(tidyverse)
 library(forecast)
 library(urca)

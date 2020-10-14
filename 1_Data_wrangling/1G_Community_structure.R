@@ -134,7 +134,16 @@ colnames(dat7)[2:10] <- paste("rel_abund", colnames(dat7)[2:10], sep = "_")
 dat8 <- left_join(dat6, dat7, by = "Date")
 dat9 <- left_join(dat8, total_bv, by = "Date")
 
-write.csv(dat9, file = "./00_Data_files/Community_structure.csv",row.names = FALSE)
+sample_depths <- dat1 %>%
+  rename(Date = Sample_date) %>%
+  select(Date, Depth) %>%
+  distinct() %>%
+  rename(Phyto_Depth_m = Depth) %>%
+  mutate(Date = as.Date(Date))
+
+dat10 <- left_join(dat9, sample_depths, by = "Date")
+
+write.csv(dat10, file = "./00_Data_files/Community_structure.csv",row.names = FALSE)
 
 #plot relative abundance of divisions
 p1 <- ggplot(dat5, aes(x = Date, y = rel_abund_group, group = Phyto_group, color = Phyto_group, fill = Phyto_group)) + 

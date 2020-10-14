@@ -64,7 +64,7 @@ sample_dates <- cmax[-66,] %>% #get rid of dates not in chem data
   select(Date, Peak_depth_m) %>%
   rename(Depth_m = Peak_depth_m)
 
-final <- matrix(NA, nrow = length(nut_dates), ncol = 10)
+final <- matrix(NA, nrow = length(nut_dates), ncol = 11)
 
 for (i in 1:length(nut_dates)){
   chem_profile <- subset(chem1, DateTime == nut_dates[i])
@@ -78,43 +78,44 @@ for (i in 1:length(nut_dates)){
   #pull chem at Cmax
   Cmax_chem <- chem_profile[which.min(abs(chem_profile$Depth_m - Cmax)),]
   
-  final[i,2] <- unlist(Cmax_chem[,3])
-  final[i,3] <- unlist(Cmax_chem[,4])
-  final[i,4] <- unlist(Cmax_chem[,5])
+  final[i,2] <- unlist(Cmax_chem[,2])
+  final[i,3] <- unlist(Cmax_chem[,3])
+  final[i,4] <- unlist(Cmax_chem[,4])
+  final[i,5] <- unlist(Cmax_chem[,5])
   
   #pull depth of max chem
   #if no clear chem max (i.e. multiple depths with same chem value)
   #then that cell is populated w/ NA
   srp <- subset(chem_profile, SRP_ugL == max(SRP_ugL, na.rm = TRUE))
   if(length(unlist(srp[,2]))>1){
-    final[i,5] <- NA
+    final[i,6] <- NA
   } else {
-    final[i,5] <- unlist(srp[,2])
-    final[i,6] <- unlist(srp[,3])
+    final[i,6] <- unlist(srp[,2])
+    final[i,7] <- unlist(srp[,3])
   }
   
   #might have an issue here w/ ammonium buildup in hypo where no light
   din <- subset(chem_profile, DIN_ugL == max(DIN_ugL, na.rm = TRUE))
   if(length(unlist(din[,2]))>1){
-    final[i,7] <- NA
+    final[i,8] <- NA
   } else {
-    final[i,7] <- unlist(din[,2])
-    final[i,8] <- unlist(din[,4])
+    final[i,8] <- unlist(din[,2])
+    final[i,9] <- unlist(din[,4])
     
   }
 
   doc <- subset(chem_profile, DOC_mgL == max(DOC_mgL, na.rm = TRUE))
   if(length(unlist(doc[,2]))>1){
-    final[i,9] <- NA
+    final[i,10] <- NA
   } else {
-    final[i,9] <- unlist(doc[,2])
-    final[i,10] <- unlist(doc[,5])
+    final[i,10] <- unlist(doc[,2])
+    final[i,11] <- unlist(doc[,5])
   }
 
 }
 
 final <- data.frame(final)
-colnames(final) <- c("Date","Cmax_SRP_ugL","Cmax_DIN_ugL","Cmax_DOC_mgL","SRPmax_depth_m","SRPmax_ugL","DINmax_depth_m","DINmax_ugL","DOCmax_depth_m","DOCmax_mgL")
+colnames(final) <- c("Date","Chem_Depth_m","Cmax_SRP_ugL","Cmax_DIN_ugL","Cmax_DOC_mgL","SRPmax_depth_m","SRPmax_ugL","DINmax_depth_m","DINmax_ugL","DOCmax_depth_m","DOCmax_mgL")
 
 #note this only has 98 rows but should still be able to left_join to final dataframe
 write.csv(final, file = "./00_Data_files/chem_vars.csv",row.names = FALSE)
