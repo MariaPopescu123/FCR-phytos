@@ -115,6 +115,12 @@ mega10 <- rbind(mega9,myNAs) %>%
 write.csv(mega10, "./2_Data_analysis/FP_megamatrix.csv",row.names = FALSE)
 
 
-##NEED TO GO BACK AND FIND DEPTH-SPECIFIC THINGS BASED ON PHYTO SAMPLE
-#SEPARATELY AND THEN CHECK DEPTH CORRELATION OF DRIVERS WITH PHYTO SAMPLES
-#AND MAKE SEPARATE MATRIX FOR PHYTO ARIMA
+#subset phyto samples that are within 1.1 m of Cmax
+#using 1.1 to be consistent w/ chem sample cutoff
+mega11 <- mega8 %>%
+  filter(abs(Peak_depth_m - Phyto_Depth_m) <= 1.1)
+#then left join to dates from mega10 in such way that end up with NAs 
+#in all appropriate places to run an AR1
+#rerun AR for-loop for FP ONLY
+#run separate for-loop for phyto community structure ONLY 
+#(will have to develop new script)
