@@ -35,8 +35,9 @@ wts <- read_csv("./00_Data_files/WtrTemp_Stability.csv") %>%
 #PAR
 par <- read_csv("./00_Data_files/Kd.csv") %>%
   mutate(Year = year(Date)) %>%
-  mutate(Kd = ifelse(is.na(CTD_Kd),YSI_Kd,CTD_Kd)) %>%
-  select(Year,Date,Kd)
+  mutate(Kd = ifelse(is.na(CTD_Kd),YSI_Kd,CTD_Kd),
+         perc_light_thermocline = ifelse(is.na(CTD_perc_light_thermocline),YSI_perc_light_thermocline,CTD_perc_light_thermocline)) %>%
+  select(Year,Date,Kd,perc_light_thermocline)
 
 #FP distribution metrics
 dist <- read_csv("./00_Data_files/FP_DistributionMetrics.csv") %>%
@@ -57,7 +58,7 @@ mega2 <- left_join(mega1, par, by = c("Year","Date"))
 mega3 <- left_join(mega2, dist, by = c("Year","Date"))
 mega4 <- left_join(mega3, bd, by = c("Year","Date")) 
 mega5 <- left_join(mega4, cs, by = c("Year","Date")) 
-mega6 <- mega5[,c(4,1:3,5:47)]
+mega6 <- mega5[,c(4,1:3,5:48)]
 
 #write megamatrix to file
 #write.csv(mega6, "./2_Data_analysis/megamatrix.csv",row.names = FALSE)
@@ -91,7 +92,7 @@ mega8 <- mega7 %>%
 #eliminate phyto vars that won't be included as drivers and limit to date of FP
 #samples
 colnames(mega8)
-mega9 <- mega8[,1:23] %>%
+mega9 <- mega8[,1:24] %>%
   filter(!is.na(Peak_depth_m))
 
 #add rows of NA in between observations that are 2 wks or more apart
@@ -114,13 +115,25 @@ mega10 <- rbind(mega9,myNAs) %>%
 #write megamatrix for FP ARIMA to file
 write.csv(mega10, "./2_Data_analysis/FP_megamatrix.csv",row.names = FALSE)
 
-
 #subset phyto samples that are within 1.1 m of Cmax
 #using 1.1 to be consistent w/ chem sample cutoff
 mega11 <- mega8 %>%
   filter(abs(Peak_depth_m - Phyto_Depth_m) <= 1.1)
+
 #then left join to dates from mega10 in such way that end up with NAs 
 #in all appropriate places to run an AR1
+final_dates <- tibble(mega10$Date)
+colnames(final_dates) <- "Date"
+mega12 <- left_join(final_dates, mega11, by = "Date")
+
+#limit to columns needed for phyto comm structure ARIMAs
+colnames(mega12)
+mega13 <- mega12[,c(1:20,25:26,29,32:33,38,41:42,47)]
+
+#write megamatrix for phyto comm structure ARIMAs to file
+write.csv(mega13, "./2_Data_analysis/CS_megamatrix.csv",row.names = FALSE)
+
+##FROM HERE:
 #rerun AR for-loop for FP ONLY
 #run separate for-loop for phyto community structure ONLY 
 #(will have to develop new script)

@@ -4,8 +4,8 @@
 
 #pull in photosynthetically active radiation (PAR) data and calculate:
 #1. Kd, or light attenuation coefficient
-#2. % surface light at the depth of Cmax - NOT CALCULATING BECAUSE DON'T HAVE INCIDENT LIGHT
-#3. % surface light at the depth of nutrients - NOT CALCULATING BECAUSE DON'T HAVE INCIDENT LIGHT
+#2. % surface light at the depth of Cmax - NOT CALCULATED YET 
+#3. % surface light at the thermocline - FOR NOW USING LIGHT AT 0.1 M AS INCIDENT LIGHT
 
 #load packages
 #install.packages('pacman')
@@ -99,10 +99,25 @@ ctd_par <- final
 #visualize PAR data, retrieve Kd and % light at Cmax and nutrient max
 #only calculating Kd for now because don't have incident light for most profiles
 
+#read in data to pull thermocline depth
+wts <- read_csv("./00_Data_files/WtrTemp_Stability.csv") %>%
+  mutate(Year = year(Date)) %>%
+  mutate(Temp_Depth_m = ifelse((is.na(CTD_Depth_m) & is.na(YSI_Depth_m)),SCC_Depth_m,
+                               ifelse((is.na(CTD_Depth_m)),YSI_Depth_m,CTD_Depth_m)),
+         Temp_C = ifelse((is.na(CTD_Temp_C) & is.na(YSI_Temp_C)),SCC_Temp_C,
+                         ifelse((is.na(CTD_Temp_C)),YSI_Temp_C,CTD_Temp_C)),
+         schmidt.stability = ifelse((is.na(CTD_schmidt.stability) & is.na(YSI_schmidt.stability)),SCC_schmidt.stability,
+                                    ifelse((is.na(CTD_schmidt.stability)),YSI_schmidt.stability,CTD_schmidt.stability)),
+         thermo.depth = ifelse((is.na(CTD_thermo.depth) & is.na(YSI_thermo.depth)),SCC_thermo.depth,
+                               ifelse((is.na(CTD_thermo.depth)),YSI_thermo.depth,CTD_thermo.depth))) %>%
+  select(Year,Date, Temp_Depth_m,Temp_C,schmidt.stability,thermo.depth)
+
 ##HUGE ISSUE: NO INCIDENT LIGHT DATA FOR CTD CASTS :-( :-(
 par_dates <- unique(ctd_par$Date)
+thermo_CTD_dates <- wts %>%
+  filter(Date %in% par_dates)
 
-final <- matrix(NA, nrow = length(par_dates), ncol = 2)
+final <- matrix(NA, nrow = length(par_dates), ncol = 3)
 
 for (i in 1:length(par_dates)){
   par_profile <- subset(ctd_par, ctd_par$Date == par_dates[i])
@@ -112,11 +127,21 @@ for (i in 1:length(par_dates)){
   kd <- unlist(mod$coefficients[2])*-1
   final[i,2] <- kd
   
+  if(!is.na(thermo_CTD_dates$thermo.depth[i])){
+    thermo.light.df <- par_profile[par_profile[, "Depth_m"] == closest(par_profile$Depth_m,thermo_CTD_dates$thermo.depth[i]),]
+    thermo.light <- thermo.light.df$PAR_umolm2s/max(par_profile$PAR_umolm2s, na.rm = TRUE)*100
+    final[i,3] <- thermo.light
+  } else {
+    final[i,3] <- NA
+  }
+  
+  
 }
 
 final <- data.frame(final) %>%
-  mutate(Date = as.Date(X1),CTD_Kd = as.double(X2)) %>%
-  select(Date, CTD_Kd)
+  mutate(Date = as.Date(X1),CTD_Kd = as.double(X2),
+         CTD_perc_light_thermocline = as.double(X3)) %>%
+  select(Date, CTD_Kd, CTD_perc_light_thermocline)
 ctd_kd <- final
 
 
@@ -170,8 +195,10 @@ check <- ysi_par %>%
 #only calculating Kd for now because don't have incident light for most profiles
 
 par_dates <- unique(ysi_par$Date)
+thermo_YSI_dates <- wts %>%
+  filter(Date %in% par_dates)
 
-final <- matrix(NA, nrow = length(par_dates), ncol = 2)
+final <- matrix(NA, nrow = length(par_dates), ncol = 3)
 
 for (i in 1:length(par_dates)){
   par_profile <- subset(ysi_par, ysi_par$Date == par_dates[i])
@@ -181,11 +208,20 @@ for (i in 1:length(par_dates)){
   kd <- unlist(mod$coefficients[2])*-1
   final[i,2] <- kd
   
+  if(!is.na(thermo_YSI_dates$thermo.depth[i])){
+    thermo.light.df <- par_profile[par_profile[, "Depth_m"] == closest(par_profile$Depth_m,thermo_YSI_dates$thermo.depth[i]),]
+    thermo.light <- thermo.light.df$PAR_umolm2s/max(par_profile$PAR_umolm2s, na.rm = TRUE)*100
+    final[i,3] <- thermo.light
+  } else {
+    final[i,3] <- NA
+  }
+  
 }
 
 final <- data.frame(final) %>%
-  mutate(Date = as.Date(X1),YSI_Kd = as.double(X2)) %>%
-  select(Date, YSI_Kd)
+  mutate(Date = as.Date(X1),YSI_Kd = as.double(X2),
+         YSI_perc_light_thermocline = as.double(X3)) %>%
+  select(Date, YSI_Kd, YSI_perc_light_thermocline)
 ysi_kd <- final
 
 Kd <- data.frame(sample_info$Date)
@@ -198,6 +234,8 @@ check <- Kd2 %>%
 
 check <- Kd2 %>%
   filter(YSI_Kd > 1.25)
+
+write.csv(Kd2, "./00_Data_files/Kd.csv",row.names = FALSE)
 
 #visualization
 Kd <- read_csv("./00_Data_files/Kd.csv")
@@ -216,4 +254,3 @@ ggplot(data = Kd_plot, aes(x = Date, y = Kd, color = sensor, group = sensor))+
   geom_line(size = 1)+
   theme_classic()
 
-write.csv(Kd2, "./00_Data_files/Kd.csv",row.names = FALSE)
