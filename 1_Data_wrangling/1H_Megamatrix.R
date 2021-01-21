@@ -134,6 +134,5 @@ mega13 <- mega12[,c(1:20,25:26,29,32:33,38,41:42,47)]
 write.csv(mega13, "./2_Data_analysis/CS_megamatrix.csv",row.names = FALSE)
 
 ##FROM HERE:
-#rerun AR for-loop for FP ONLY
 #run separate for-loop for phyto community structure ONLY 
 #(will have to develop new script)

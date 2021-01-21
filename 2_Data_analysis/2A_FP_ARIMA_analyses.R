@@ -1,4 +1,4 @@
-#2A_ARIMA_analyses
+#2A_FP_ARIMA_analyses
 #Author: Mary Lofton
 #Date: 13OCT20
 
@@ -9,18 +9,30 @@ rm(list=ls())
 
 #get data
 mydata <- read_csv("./2_Data_analysis/FP_megamatrix.csv") %>%
-  select(-Chem_Depth_m,-Temp_Depth_m)
+  select(-Chem_Depth_m,-Temp_Depth_m) %>%
+  mutate(MonthDay = format(Date, format="%m-%d")) %>%
+  filter(MonthDay >= "05-01" & MonthDay <= "09-20") %>%
+  select(-MonthDay)
 mydata <- mydata[,c(2,1,3:22)]
+
+AR_NAs <- read_csv("./2_Data_analysis/FP_megamatrix.csv")
+AR_NAs <- AR_NAs[c(24,47,68),]
+
+mydata <- bind_rows(mydata, AR_NAs)%>%
+  arrange(Date)
 
 #look at correlations - cutoff of 0.5
 driver_cor <- cor(mydata[,2:18],method = "spearman",use = "complete.obs")
 driver_cor[lower.tri(driver_cor)] = ""
-#thermo.depth and Year - yes
-#SRPmax_ugL and Cmax_SRP_ugL - yes
-#DINmax_ugL and DOC_max_mgL - yes
-#DOCmax_mgL and Cmax_DOC_mgL - yes
-#schmidt.stability and thermo.depth - yes
-#thermo.depth and perc_light_thermocline - yes
+#Cmax_DOC_mgL and Year
+#SRPmax_ugL and Cmax_SRP_ugL
+#DOCmax_mgL and Year
+#DOCmax_mgL and Cmax_DOC_mgL
+#DOCmax_mgL and DINmax_ugL
+#schmidt.stability and Year
+#thermo.depth and Year
+#thermo.depth and schmidt.stability
+#perc_light_thermocline and thermo.depth
 
 #transform correlation matrix into adjacency matrix for network plot
 driver_cor <- data.frame(driver_cor)
@@ -317,24 +329,38 @@ dev.off()
 #look at correlations of collinear drivers w/ responses to select drivers
 mydata1 <- mydata %>%
   select(Max_biomass_ugL:Peak_width_m,
-         thermo.depth,Year,SRPmax_ugL,Cmax_SRP_ugL,DINmax_ugL,DOCmax_mgL,
-         Cmax_DOC_mgL,schmidt.stability, perc_light_thermocline)
+         Cmax_DOC_mgL, Year, SRPmax_ugL, Cmax_SRP_ugL, DOCmax_mgL, DINmax_ugL,
+         schmidt.stability, thermo.depth, perc_light_thermocline)
 response_cor <- cor(mydata1,method = "spearman",use = "complete.obs")
 response_cor <- data.frame(response_cor)
-response_cor <- response_cor[,c(1:4)]
-#thermo.depth and Year
-mean(abs(as.numeric(response_cor[5,])))#thermo.depth = 0.24
-mean(abs(as.numeric(response_cor[6,])))#year = 0.13
-mean(abs(as.numeric(response_cor[12,])))#schmidt.stability = 0.11
-mean(abs(as.numeric(response_cor[13,])))#perc_light_thermocline = 0.19
+response_cor <- response_cor[c(5:13),c(1:4)]
+
+#Cmax_DOC_mgL and Year
+mean(abs(as.numeric(response_cor[1,])))#Cmax_DOC_mgL = 0.25
+mean(abs(as.numeric(response_cor[2,])))#Year = 0.15
+
 #SRPmax_ugL and Cmax_SRP_ugL
-mean(abs(as.numeric(response_cor[7,])))#SRPmax_ugL = 0.04
-mean(abs(as.numeric(response_cor[8,])))#Cmax_SRP_ugL = 0.16
-#DINmax_ugL and DOC_max_mgL
-mean(abs(as.numeric(response_cor[9,])))#DINmax_ugL = 0.327
-mean(abs(as.numeric(response_cor[10,])))#DOCmax_ugL = 0.334
+mean(abs(as.numeric(response_cor[3,])))#SRPmax_ugL = 0.05
+mean(abs(as.numeric(response_cor[4,])))#Cmax_SRP_ugL = 0.15
+
+#DOCmax_mgL and Year
+mean(abs(as.numeric(response_cor[5,])))#DOCmax_mgL = 0.33
+
 #DOCmax_mgL and Cmax_DOC_mgL
-mean(abs(as.numeric(response_cor[11,])))#0.256
+
+#DOCmax_mgL and DINmax_ugL
+mean(abs(as.numeric(response_cor[6,])))#DINmax_ugL = 0.29
+
+#schmidt.stability and Year
+mean(abs(as.numeric(response_cor[7,])))#schmidt.stability = 0.19
+
+#thermo.depth and Year
+mean(abs(as.numeric(response_cor[8,])))#thermo.depth = 0.27
+
+#thermo.depth and schmidt.stability
+
+#perc_light_thermocline and thermo.depth
+mean(abs(as.numeric(response_cor[9,])))#perc_light_thermocline = 0.20
 
 #get rid of Year, schmidt.stability, and perc_light_thermocline
 #get rid of SRPmax_ugL
