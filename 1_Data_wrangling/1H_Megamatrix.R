@@ -113,25 +113,32 @@ mega10 <- rbind(mega9,myNAs) %>%
   arrange(Year,Date)
 
 #write megamatrix for FP ARIMA to file
-write.csv(mega10, "./2_Data_analysis/FP_megamatrix.csv",row.names = FALSE)
+#write.csv(mega10, "./2_Data_analysis/FP_megamatrix.csv",row.names = FALSE)
 
 #subset phyto samples that are within 1.1 m of Cmax
 #using 1.1 to be consistent w/ chem sample cutoff
-mega11 <- mega8 %>%
+mega11 <- mega10 %>%
   filter(abs(Peak_depth_m - Phyto_Depth_m) <= 1.1)
+drivers <- mega8 %>%
+  filter(abs(Peak_depth_m - Phyto_Depth_m) >= 1.1) 
+colnames(drivers)
+drivers[,c(25:48)] <- NA
+
+mega12 <- bind_rows(mega11, drivers) %>%
+  arrange(Date)
 
 #then left join to dates from mega10 in such way that end up with NAs 
 #in all appropriate places to run an AR1
 final_dates <- tibble(mega10$Date)
 colnames(final_dates) <- "Date"
-mega12 <- left_join(final_dates, mega11, by = "Date")
+mega13 <- left_join(final_dates, mega12, by = "Date")
 
 #limit to columns needed for phyto comm structure ARIMAs
-colnames(mega12)
-mega13 <- mega12[,c(1:20,25:26,29,32:33,38,41:42,47)]
+colnames(mega13)
+mega14 <- mega13[,c(1:20,25:26,29,32:33,38,41:42,47)]
 
 #write megamatrix for phyto comm structure ARIMAs to file
-write.csv(mega13, "./2_Data_analysis/CS_megamatrix.csv",row.names = FALSE)
+write.csv(mega14, "./2_Data_analysis/CS_megamatrix.csv",row.names = FALSE)
 
 ##FROM HERE:
 #run separate for-loop for phyto community structure ONLY 

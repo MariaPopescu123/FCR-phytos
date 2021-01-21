@@ -15,7 +15,8 @@ mydata <- read_csv("./2_Data_analysis/FP_megamatrix.csv") %>%
   select(-MonthDay)
 mydata <- mydata[,c(2,1,3:22)]
 
-AR_NAs <- read_csv("./2_Data_analysis/FP_megamatrix.csv")
+AR_NAs <- read_csv("./2_Data_analysis/FP_megamatrix.csv")%>%
+  select(-Chem_Depth_m,-Temp_Depth_m)
 AR_NAs <- AR_NAs[c(24,47,68),]
 
 mydata <- bind_rows(mydata, AR_NAs)%>%
