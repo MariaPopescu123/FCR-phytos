@@ -13,9 +13,7 @@
 pacman::p_load(tidyverse, lubridate)
 
 #read in top models for full timeseries
-FP.top.models <- read_csv("./2_Data_analysis/FP_top_models.csv") 
-CS.top.models <- read_csv("./2_Data_analysis/CS_top_models.csv")
-top.models <- bind_rows(FP.top.models, CS.top.models)
+top.models <- read_csv("./2_Data_analysis/top_models.csv")
 
 best.models <- top.models %>%
   filter(Rank == 1)

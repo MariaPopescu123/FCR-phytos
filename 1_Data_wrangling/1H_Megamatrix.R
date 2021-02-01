@@ -92,7 +92,7 @@ mega8 <- mega7 %>%
 #eliminate phyto vars that won't be included as drivers and limit to date of FP
 #samples
 colnames(mega8)
-mega9 <- mega8[,1:24] %>%
+mega9 <- mega8[,c(1:24)] %>%
   filter(!is.na(Peak_depth_m))
 
 #add rows of NA in between observations that are 2 wks or more apart
@@ -113,14 +113,14 @@ mega10 <- rbind(mega9,myNAs) %>%
   arrange(Year,Date)
 
 #write megamatrix for FP ARIMA to file
-#write.csv(mega10, "./2_Data_analysis/FP_megamatrix.csv",row.names = FALSE)
+write.csv(mega10, "./2_Data_analysis/FP_megamatrix.csv",row.names = FALSE)
 
 #subset phyto samples that are within 1.1 m of Cmax
 #using 1.1 to be consistent w/ chem sample cutoff
-mega11 <- mega10 %>%
+mega11 <- mega8 %>%
   filter(abs(Peak_depth_m - Phyto_Depth_m) <= 1.1)
 drivers <- mega8 %>%
-  filter(abs(Peak_depth_m - Phyto_Depth_m) >= 1.1) 
+  filter(abs(Peak_depth_m - Phyto_Depth_m) > 1.1) 
 colnames(drivers)
 drivers[,c(25:48)] <- NA
 

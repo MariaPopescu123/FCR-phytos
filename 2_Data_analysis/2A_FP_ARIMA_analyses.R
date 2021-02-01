@@ -35,7 +35,8 @@ my.cs.data <- bind_rows(my.cs.data, CS_AR_NAs)%>%
   arrange(Date) %>%
   select(Date,shannon:BV_TOTAL)
 
-mydata <- left_join(my.fp.data,my.cs.data, by = "Date")
+mydata <- left_join(my.fp.data,my.cs.data, by = "Date") %>%
+  select(-Peak_magnitude_ugL, -Peak_width_m)
 
 #look at correlations - cutoff of 0.5
 driver_cor <- cor(mydata[,2:18],method = "spearman",use = "complete.obs")
@@ -57,34 +58,34 @@ mydata1 <- mydata %>%
          schmidt.stability, thermo.depth, perc_light_thermocline)
 response_cor <- cor(mydata1,method = "spearman",use = "complete.obs")
 response_cor <- data.frame(response_cor)
-response_cor <- response_cor[c(14:22),c(1:13)]
+response_cor <- response_cor[c(12:20),c(1:11)]
 
 #Cmax_DOC_mgL and Year
 mean(abs(as.numeric(response_cor[1,])))#Cmax_DOC_mgL = 0.22
-mean(abs(as.numeric(response_cor[2,])))#Year = 0.22
+mean(abs(as.numeric(response_cor[2,])))#Year = 0.26
 
 #SRPmax_ugL and Cmax_SRP_ugL
-mean(abs(as.numeric(response_cor[3,])))#SRPmax_ugL = 0.13
-mean(abs(as.numeric(response_cor[4,])))#Cmax_SRP_ugL = 0.11
+mean(abs(as.numeric(response_cor[3,])))#SRPmax_ugL = 0.14
+mean(abs(as.numeric(response_cor[4,])))#Cmax_SRP_ugL = 0.09
 
 #DOCmax_mgL and Year
-mean(abs(as.numeric(response_cor[5,])))#DOCmax_mgL = 0.30
+mean(abs(as.numeric(response_cor[5,])))#DOCmax_mgL = 0.31
 
 #DOCmax_mgL and Cmax_DOC_mgL
 
 #DOCmax_mgL and DINmax_ugL
-mean(abs(as.numeric(response_cor[6,])))#DINmax_ugL = 0.28
+mean(abs(as.numeric(response_cor[6,])))#DINmax_ugL = 0.29
 
 #schmidt.stability and Year
 mean(abs(as.numeric(response_cor[7,])))#schmidt.stability = 0.17
 
 #thermo.depth and Year
-mean(abs(as.numeric(response_cor[8,])))#thermo.depth = 0.13
+mean(abs(as.numeric(response_cor[8,])))#thermo.depth = 0.12
 
 #thermo.depth and schmidt.stability
 
 #perc_light_thermocline and thermo.depth
-mean(abs(as.numeric(response_cor[9,])))#perc_light_thermocline = 0.20
+mean(abs(as.numeric(response_cor[9,])))#perc_light_thermocline = 0.19
 
 #get rid of Year
 #get rid of Cmax_SRP_ugL

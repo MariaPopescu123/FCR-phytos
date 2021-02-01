@@ -2,43 +2,78 @@
 #Author: Mary Lofton
 #Date: 06OCT20
 
-#NEED TO GO BACK THROUGH THIS AND ELIMINATE DATES WHERE THE PEAK_DEPTH_M IS 
-#MORE THAN 1.2 M FROM THE PHYTO SAMPLE!!
-
 library(tidyverse)
 library(forecast)
 library(urca)
 
-mega <- read_csv("./2_Data_analysis/megamatrix.csv")%>%
-  select(Max_biomass_ugL:BV_TOTAL, Year,Date) %>%
-  filter(!Date %in% as.Date(c("2017-01-19","2017-05-01","2017-05-08","2019-01-21")))
+#get data
+my.fp.data <- read_csv("./2_Data_analysis/FP_megamatrix.csv") %>%
+  select(-Chem_Depth_m,-Temp_Depth_m) %>%
+  mutate(MonthDay = format(Date, format="%m-%d")) %>%
+  filter(MonthDay >= "05-01" & MonthDay <= "09-20") %>%
+  select(-MonthDay)
+my.fp.data <- my.fp.data[,c(2,1,3:22)]
 
-yrs <- c(2016:2019)
-final <- list(y2016 = matrix(NA,nrow = 8, ncol = 4),
-              y2017 = matrix(NA,nrow = 8, ncol = 4),
-              y2018 = matrix(NA,nrow = 8, ncol = 4),
-              y2019 = matrix(NA,nrow = 8, ncol = 4))
+my.cs.data <- read_csv("./2_Data_analysis/CS_megamatrix.csv") %>%
+  select(-Chem_Depth_m,-Temp_Depth_m) %>%
+  mutate(MonthDay = format(Date, format="%m-%d")) %>%
+  filter(MonthDay >= "05-01" & MonthDay <= "09-20") %>%
+  select(-MonthDay) %>%
+  select(Date,shannon:BV_TOTAL)
 
-for (i in 1:4){
-  yr.data <- mega %>%
-    filter(Year == yrs[i])
+mydata <- left_join(my.fp.data,my.cs.data, by = "Date")
+
+mega <- mydata %>%
+  select(Max_biomass_ugL:BV_TOTAL, Year,Date) 
+
+check <- cor(mega$Peak_magnitude_ugL,mega$Max_biomass_ugL,method = "spearman",use = "complete.obs")
+
+# yrs <- c(2016:2019)
+# final <- list(y2016 = matrix(NA,nrow = 9, ncol = 4),
+#               y2017 = matrix(NA,nrow = 9, ncol = 4),
+#               y2018 = matrix(NA,nrow = 9, ncol = 4),
+#               y2019 = matrix(NA,nrow = 9, ncol = 4))
+final <- matrix(NA,nrow = 9, ncol = 4)
+
   
   for (j in 1:4){
-  
-    FP.metric <- yr.data[,j]
     
-    for (k in 1:8){
+    FP.metric <- mega[,j]
+    
+    for (k in 1:9){
       
-      other.metric <- yr.data[,k+9]
+      other.metric <- mega[,k+4]
       my.cor <- cor(FP.metric,other.metric,method = "spearman",use = "complete.obs")
-      final[[i]][k,j] <- my.cor
+      final[k,j] <- my.cor
       
-    }}}
+    }}
 
-result <- data.frame(rbind(final[[1]],final[[2]],final[[3]],final[[4]]))
-result$Year <- rep(2016:2019, each = 8)
-result$Comm_metric <- rep(colnames(mega)[10:17],times = 4)
+# for (i in 1:4){
+#   yr.data <- mega %>%
+#     filter(Year == yrs[i])
+#   
+#   for (j in 1:4){
+#   
+#     FP.metric <- yr.data[,j]
+#     
+#     for (k in 1:9){
+#       
+#       other.metric <- yr.data[,k+4]
+#       my.cor <- cor(FP.metric,other.metric,method = "spearman",use = "complete.obs")
+#       final[[i]][k,j] <- my.cor
+#       
+#     }}}
+
+result <- data.frame(final)
 colnames(result)[1:4] <- c("Max_biomass_ugL","Peak_depth_m","Peak_magnitude_ugL","Peak_width_m")
+#result[abs(result) < 0.4] <- NA
+result <- round(result, digits = 2)
+result$Comm_metric <- colnames(mega)[5:13]
+write.csv(result, "./2_Data_analysis/spearman_results.csv",row.names = FALSE)
+# result <- data.frame(rbind(final[[1]],final[[2]],final[[3]],final[[4]]))
+# result$Year <- rep(2016:2019, each = 9)
+# result$Comm_metric <- rep(colnames(mega)[5:13],times = 4)
+# colnames(result)[1:4] <- c("Max_biomass_ugL","Peak_depth_m","Peak_magnitude_ugL","Peak_width_m")
 
 result <- result %>%
   arrange(Comm_metric) %>%
@@ -57,12 +92,12 @@ ggplot(data = result, aes(x = FP_metric, y = cor, group = as.factor(Year), color
 
 
 for (i in 1:4){
-  for (j in 1:8){
-    my.plot <- ggplot(data = mega, aes_string(x = mega[,i], y = mega[,j+9], group = as.factor(mega$Year), color = as.factor(mega$Year), fill = as.factor(mega$Year)))+
+  for (j in 1:9){
+    my.plot <- ggplot(data = mega, aes_string(x = mega[,i], y = mega[,j+4], group = as.factor(mega$Year), color = as.factor(mega$Year), fill = as.factor(mega$Year)))+
       geom_point()+
       geom_smooth(method = "lm")+
       xlab(colnames(mega)[i])+
-      ylab(colnames(mega)[j+9])+
+      ylab(colnames(mega)[j+4])+
       theme_classic()
     
     print(my.plot)
