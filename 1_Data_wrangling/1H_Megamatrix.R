@@ -58,7 +58,7 @@ mega2 <- left_join(mega1, par, by = c("Year","Date"))
 mega3 <- left_join(mega2, dist, by = c("Year","Date"))
 mega4 <- left_join(mega3, bd, by = c("Year","Date")) 
 mega5 <- left_join(mega4, cs, by = c("Year","Date")) 
-mega6 <- mega5[,c(4,1:3,5:48)]
+mega6 <- mega5[,c(6,1:5,7:50)]
 
 #write megamatrix to file
 #write.csv(mega6, "./2_Data_analysis/megamatrix.csv",row.names = FALSE)
@@ -92,7 +92,7 @@ mega8 <- mega7 %>%
 #eliminate phyto vars that won't be included as drivers and limit to date of FP
 #samples
 colnames(mega8)
-mega9 <- mega8[,c(1:24)] %>%
+mega9 <- mega8[,c(1:26)] %>%
   filter(!is.na(Peak_depth_m))
 
 #add rows of NA in between observations that are 2 wks or more apart
@@ -122,7 +122,7 @@ mega11 <- mega8 %>%
 drivers <- mega8 %>%
   filter(abs(Peak_depth_m - Phyto_Depth_m) > 1.1) 
 colnames(drivers)
-drivers[,c(25:48)] <- NA
+drivers[,c(27:50)] <- NA
 
 mega12 <- bind_rows(mega11, drivers) %>%
   arrange(Date)
@@ -135,7 +135,7 @@ mega13 <- left_join(final_dates, mega12, by = "Date")
 
 #limit to columns needed for phyto comm structure ARIMAs
 colnames(mega13)
-mega14 <- mega13[,c(1:20,25:26,29,32:33,38,41:42,47)]
+mega14 <- mega13[,c(1:22,27:50)]
 
 #write megamatrix for phyto comm structure ARIMAs to file
 write.csv(mega14, "./2_Data_analysis/CS_megamatrix.csv",row.names = FALSE)

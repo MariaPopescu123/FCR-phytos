@@ -48,12 +48,12 @@ pacman::p_load(tidyverse, lubridate)
 rm(list=ls())
 
 
-# #vector of EM operation dates
-# EM_dates <- as.Date(c("2016-05-30", "2016-06-06","2016-06-13","2016-06-27",
-#               "2016-07-05","2016-07-11","2016-07-25","2016-08-01","2016-08-08",
-#               "2017-05-29","2017-06-05","2017-06-12", "2017-07-10",
-#               "2017-07-17","2017-07-24"))
-# #these are including dates of EM + 2 wks after
+#vector of EM operation dates
+EM_dates <- as.Date(c("2016-05-30", "2016-06-06","2016-06-13","2016-06-27",
+              "2016-07-05","2016-07-11","2016-07-25","2016-08-01","2016-08-08",
+              "2017-05-29","2017-06-05","2017-06-12", "2017-07-10",
+              "2017-07-17","2017-07-24"))
+#these are including dates of EM + 2 wks after
 
               
 #get sampling dates and add columns for HOx/EM operation
@@ -68,11 +68,28 @@ hoxem <- read_csv("./00_Data_files/EDI_phytos/phytoplankton.csv") %>%
                             (Date > "2019-07-08" & Date <= "2019-07-22") |
                             (Date > "2019-08-05" & Date <= "2019-08-19") |
                             (Date > "2019-09-02" & Date <= "2019-11-20"),1,0),
-         EM = ifelse(year(Date) %in% c(2016,2017),1,0))
+         EM1 = ifelse(Date %in% EM_dates, 1, 0),
+         EM2 = ifelse(year(Date) %in% c(2016,2017),1,0),
+         EM3 = ifelse(Date < "2016-05-30","pre-mix 2016",
+                      ifelse(Date >= "2016-05-30" & Date <= "2016-06-13","post-EM1 2016",
+                             ifelse(Date > "2016-06-13" & Date < "2016-06-27","pre-EM2 2016",
+                                    ifelse(Date >= "2016-06-27" & Date <= "2016-07-11","post-EM2 2016",
+                                           ifelse(Date > "2016-07-11" & Date < "2016-07-25","pre-EM3 2016",
+                                                  ifelse(Date >= "2016-07-25" & Date <= "2016-08-08","post-EM3 2016",
+                                                         ifelse(Date > "2016-08-08" & Date < "2017-01-01","post-mix 2016",
+                                                                ifelse(Date >= "2017-01-01" & Date < "2017-05-29","pre-mix 2017",
+                                                                       ifelse(Date >= "2017-05-29" & Date <= "2017-06-12","post-EM1 2017",
+                                                                              ifelse(Date > "2017-06-12" & Date < "2017-07-10","pre-EM2 2017",
+                                                                                     ifelse(Date >= "2017-07-10" & Date <= "2017-07-24","post-EM2 2017",
+                                                                                            ifelse(Date > "2017-07-24" & Date < "2018-01-01","post-mix 2017",
+                                                                                                   ifelse(year(Date) == 2018,"2018",
+                                                                                                          ifelse(year(Date) == 2019, "2019", NA)))))))))))))))
 
 #check to make sure 1s populated properly
 plot(hoxem$Date, hoxem$HOx)
-plot(hoxem$Date, hoxem$EM)
+plot(hoxem$Date, hoxem$EM1)
+plot(hoxem$Date, hoxem$EM2)
+
 
 #write to file
 write.csv(hoxem, file = "./00_Data_files/HOx_EM_operation.csv", row.names = FALSE)

@@ -1,0 +1,8 @@
+# Ignore everything in this directory
+*
+# Except this file
+!.gitignore
+!3A_ARIMA_results_exploration.R
+!3B_NMDS_corr_plots.R
+!FCR_locator_map.R
+!Network_correlation_plots.R
