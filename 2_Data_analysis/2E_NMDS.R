@@ -29,14 +29,14 @@ phytos <- read_csv("./00_Data_files/EDI_phytos/phytoplankton.csv") %>%
 phytos[is.na(phytos)]<- 0
 
 # create data frame with different EM periods for plotting later on
-em <- my.cs.data[,c(1,4,5,6)] %>%
+em <- my.cs.data[,c(1,2,4,5,6)] %>%
   mutate(Month = month(Date))
 
 phytos1 <- left_join(em, phytos, by = "Date")
 
 # prepare phyto data for NMDS input
 phytos2 <- phytos1 %>%
-  select(-Date,-EM1,-EM2,-EM3,-Month)
+  select(-Date,-EM1,-EM2,-EM3,-Month,-Year)
 
 phytos3 <- as.matrix(phytos2)
 
@@ -60,6 +60,7 @@ legend("topright",legend = c("all years"),bty = 'n')
 #based on results of scree plot, the best choice for k is 3
 
 #run NMDS for all months
+set.seed(1)
 Q <- metaMDS(phytos3, distance='bray', k=3, trymax=50, autotransform=FALSE, pc=FALSE, plot=FALSE)
 Q$stress
 # Q$species
@@ -68,18 +69,28 @@ plot(Q, display=c('sites'), choices=c(1,2), type='p')
 plot(Q, display=c('sites'), choices=c(1,3), type='p')
 
 #run initial correlations with environmental variables
-en_0 = envfit(Q, env, permutations = 999, na.rm = TRUE)
+set.seed(1)
+en_0 = envfit(Q, env, permutations = 999, na.rm = TRUE, choices = c(1,2))
 en_0
+set.seed(1)
+en_1 = envfit(Q, env, permutations = 999, na.rm = TRUE, choices = c(1,3))
+en_1
 
 # selecting environmental drivers that were significant in NMDS for
 # all years so plot is less busy
-env_all <- env %>%
-  select(Year, EM2, DINmax_ugL, DOCmax_depth_m, DOCmax_mgL,
-         thermo.depth, Kd, perc_light_thermocline)
+env_all_12 <- env %>%
+  select(Year, EM2, DINmax_ugL, DOCmax_depth_m,
+         DOCmax_mgL, thermo.depth, Kd)
+env_all_13 <- env %>%
+  select(Temp_C, thermo.depth, Kd)
 
 #run final correlations w/ significant environmental variables
-en = envfit(Q, env_all, permutations = 999, na.rm = TRUE)
-en
+set.seed(1)
+en12 = envfit(Q, env_all_12, permutations = 999, na.rm = TRUE, choices = c(1,2))
+en12
+set.seed(1)
+en13 = envfit(Q, env_all_13, permutations = 999, na.rm = TRUE, choices = c(1,3))
+en13
 
 #get colors for plotting
 gg_color_hue <- function(n) {
@@ -94,92 +105,118 @@ my.cols <- gg_color_hue(14)
 #first and second axes
 png(filename = "./3_Visualization/NMDS_all_1_2_EM3.png",width = 9,height = 9,units = "in",res = 300)
 plot(Q, display=c('sites','species'),choices=c(1,2), type='n')
-points(Q$points[phytos1$EM3=="pre-mix 2016",1], Q$points[phytos1$EM3=="pre-mix 2016",2], pch=21,bg=my.cols[1])
-points(Q$points[phytos1$EM3=="post-EM1 2016",1], Q$points[phytos1$EM3=="post-EM1 2016",2], pch=21,bg=my.cols[2])
-points(Q$points[phytos1$EM3=="pre-EM2 2016",1], Q$points[phytos1$EM3=="pre-EM2 2016",2], pch=21,bg=my.cols[3])
-points(Q$points[phytos1$EM3=="post-EM2 2016",1], Q$points[phytos1$EM3=="post-EM2 2016",2], pch=21,bg=my.cols[4])
-points(Q$points[phytos1$EM3=="pre-EM3 2016",1], Q$points[phytos1$EM3=="pre-EM3 2016",2], pch=21,bg=my.cols[5])
-points(Q$points[phytos1$EM3=="post-EM3 2016",1], Q$points[phytos1$EM3=="post-EM3 2016",2], pch=21,bg=my.cols[6])
-points(Q$points[phytos1$EM3=="post-mix 2016",1], Q$points[phytos1$EM3=="post-mix 2016",2], pch=21,bg=my.cols[7])
-points(Q$points[phytos1$EM3=="pre-mix 2017",1], Q$points[phytos1$EM3=="pre-mix 2017",2], pch=21,bg=my.cols[8])
-points(Q$points[phytos1$EM3=="post-EM1 2017",1], Q$points[phytos1$EM3=="post-EM1 2017",2], pch=21,bg=my.cols[9])
-points(Q$points[phytos1$EM3=="pre-EM2 2017",1], Q$points[phytos1$EM3=="pre-EM2 2017",2], pch=21,bg=my.cols[10])
-points(Q$points[phytos1$EM3=="post-EM2 2017",1], Q$points[phytos1$EM3=="post-EM2 2017",2], pch=21,bg=my.cols[11])
-points(Q$points[phytos1$EM3=="post-mix 2017",1], Q$points[phytos1$EM3=="post-mix 2017",2], pch=21,bg=my.cols[12])
-points(Q$points[phytos1$EM3=="2018",1], Q$points[phytos1$EM3=="2018",2], pch=21,bg=my.cols[13])
-points(Q$points[phytos1$EM3=="2019",1], Q$points[phytos1$EM3=="2019",2], pch=21,bg=my.cols[14])
-plot(en)
-legend("topright",legend = c("pre-mix 2016","post-EM1 2016","pre-EM2 2016",
+points(Q$points[phytos1$EM3=="pre-mix 2016",1], Q$points[phytos1$EM3=="pre-mix 2016",2], pch=21,bg=my.cols[1], cex = 2)
+points(Q$points[phytos1$EM3=="post-EM1 2016",1], Q$points[phytos1$EM3=="post-EM1 2016",2], pch=21,bg=my.cols[2], cex = 2)
+points(Q$points[phytos1$EM3=="pre-EM2 2016",1], Q$points[phytos1$EM3=="pre-EM2 2016",2], pch=21,bg=my.cols[3], cex = 2)
+points(Q$points[phytos1$EM3=="post-EM2 2016",1], Q$points[phytos1$EM3=="post-EM2 2016",2], pch=21,bg=my.cols[4], cex = 2)
+points(Q$points[phytos1$EM3=="pre-EM3 2016",1], Q$points[phytos1$EM3=="pre-EM3 2016",2], pch=21,bg=my.cols[5], cex = 2)
+points(Q$points[phytos1$EM3=="post-EM3 2016",1], Q$points[phytos1$EM3=="post-EM3 2016",2], pch=21,bg=my.cols[6], cex = 2)
+points(Q$points[phytos1$EM3=="post-mix 2016",1], Q$points[phytos1$EM3=="post-mix 2016",2], pch=21,bg=my.cols[7], cex = 2)
+points(Q$points[phytos1$EM3=="pre-mix 2017",1], Q$points[phytos1$EM3=="pre-mix 2017",2], pch=21,bg=my.cols[8], cex = 2)
+points(Q$points[phytos1$EM3=="post-EM1 2017",1], Q$points[phytos1$EM3=="post-EM1 2017",2], pch=21,bg=my.cols[9], cex = 2)
+points(Q$points[phytos1$EM3=="pre-EM2 2017",1], Q$points[phytos1$EM3=="pre-EM2 2017",2], pch=21,bg=my.cols[10], cex = 2)
+points(Q$points[phytos1$EM3=="post-EM2 2017",1], Q$points[phytos1$EM3=="post-EM2 2017",2], pch=21,bg=my.cols[11], cex = 2)
+points(Q$points[phytos1$EM3=="post-mix 2017",1], Q$points[phytos1$EM3=="post-mix 2017",2], pch=21,bg=my.cols[12], cex = 2)
+points(Q$points[phytos1$EM3=="2018",1], Q$points[phytos1$EM3=="2018",2], pch=21,bg=my.cols[13], cex = 2)
+points(Q$points[phytos1$EM3=="2019",1], Q$points[phytos1$EM3=="2019",2], pch=21,bg=my.cols[14], cex = 2)
+plot(en12)
+legend("bottomleft",legend = c("pre-mix 2016","post-EM1 2016","pre-EM2 2016",
                              "post-EM2 2016","pre-EM3 2016","post-EM3 2016",
                              "post-mix 2016","pre-mix 2017","post-EM1 2017",
                              "pre-EM2 2017","post-EM2 2017","post-mix 2017",
-                             "2018","2019"), pch = 21, pt.bg = my.cols, bty = "n")
-legend("bottomright",legend = c("k = 0.11"),bty = "n")
+                             "2018","2019"), pch = 21, pt.bg = my.cols, bty = "n", pt.cex = 2)
+legend("topleft",legend = c("k = 0.11"),bty = "n")
 dev.off()
 
 #first two axes in black and white
 png(filename = "./3_Visualization/NMDS_all_1_2_EM1.png",width = 9,height = 9,units = "in",res = 300)
 plot(Q, display=c('sites','species'),choices=c(1,2), type='n')
-points(Q$points[phytos1$EM1==1,1], Q$points[phytos1$EM1==1,2], pch=21,bg="black")
-points(Q$points[phytos1$EM1==0,1], Q$points[phytos1$EM1==0,2], pch=21,bg="white")
-plot(en)
-legend("topright",legend = c("EM + 2 wks post","no EM"), pch = 21, pt.bg = c("black","white"), bty = "n")
+points(Q$points[phytos1$EM1==1,1], Q$points[phytos1$EM1==1,2], pch=21,bg="black", cex = 2)
+points(Q$points[phytos1$EM1==0,1], Q$points[phytos1$EM1==0,2], pch=21,bg="white", cex = 2)
+plot(en12)
+legend("topright",legend = c("EM + 2 wks post","no EM"), pch = 21, pt.bg = c("black","white"), bty = "n", pt.cex = 2)
 legend("bottomright",legend = c("k = 0.11"),bty = "n")
 dev.off()
 
 #first two axes in black and white w/ EM coded by year
 png(filename = "./3_Visualization/NMDS_all_1_2_EM2.png",width = 9,height = 9,units = "in",res = 300)
 plot(Q, display=c('sites','species'),choices=c(1,2), type='n')
-points(Q$points[phytos1$EM2==1,1], Q$points[phytos1$EM2==1,2], pch=21,bg="black")
-points(Q$points[phytos1$EM2==0,1], Q$points[phytos1$EM2==0,2], pch=21,bg="white")
-plot(en)
-legend("topright",legend = c("EM years","years w/ no EM"), pch = 21, pt.bg = c("black","white"), bty = "n")
+points(Q$points[phytos1$EM2==1,1], Q$points[phytos1$EM2==1,2], pch=21,bg="black", cex = 2)
+points(Q$points[phytos1$EM2==0,1], Q$points[phytos1$EM2==0,2], pch=21,bg="white", cex = 2)
+plot(en12)
+legend("topright",legend = c("EM years","years w/ no EM"), pch = 21, pt.bg = c("black","white"), bty = "n", pt.cex = 2)
+legend("bottomright",legend = c("k = 0.11"),bty = "n")
+dev.off()
+
+#first and second axes by year
+my.cols <- gg_color_hue(4)
+png(filename = "./3_Visualization/NMDS_all_1_2_year.png",width = 9,height = 9,units = "in",res = 300)
+plot(Q, display=c('sites','species'),choices=c(1,2), type='n')
+points(Q$points[phytos1$Year==2016,1], Q$points[phytos1$Year==2016,2], pch=21,bg=my.cols[1], cex = 2)
+points(Q$points[phytos1$Year==2017,1], Q$points[phytos1$Year==2017,2], pch=21,bg=my.cols[2], cex = 2)
+points(Q$points[phytos1$Year==2018,1], Q$points[phytos1$Year==2018,2], pch=21,bg=my.cols[3], cex = 2)
+points(Q$points[phytos1$Year==2019,1], Q$points[phytos1$Year==2019,2], pch=21,bg=my.cols[4], cex = 2)
+plot(en12)
+legend("topright",legend = c("2016","2017","2018","2019"), pch = 21, pt.bg = my.cols, bty = "n", pt.cex = 2)
 legend("bottomright",legend = c("k = 0.11"),bty = "n")
 dev.off()
 
 #first and third axes
 png(filename = "./3_Visualization/NMDS_all_1_3_EM3.png",width = 9,height = 9,units = "in",res = 300)
 plot(Q, display=c('sites','species'),choices=c(1,3), type='n')
-points(Q$points[phytos1$EM3=="pre-mix 2016",1], Q$points[phytos1$EM3=="pre-mix 2016",3], pch=21,bg=my.cols[1])
-points(Q$points[phytos1$EM3=="post-EM1 2016",1], Q$points[phytos1$EM3=="post-EM1 2016",3], pch=21,bg=my.cols[2])
-points(Q$points[phytos1$EM3=="pre-EM2 2016",1], Q$points[phytos1$EM3=="pre-EM2 2016",3], pch=21,bg=my.cols[3])
-points(Q$points[phytos1$EM3=="post-EM2 2016",1], Q$points[phytos1$EM3=="post-EM2 2016",3], pch=21,bg=my.cols[4])
-points(Q$points[phytos1$EM3=="pre-EM3 2016",1], Q$points[phytos1$EM3=="pre-EM3 2016",3], pch=21,bg=my.cols[5])
-points(Q$points[phytos1$EM3=="post-EM3 2016",1], Q$points[phytos1$EM3=="post-EM3 2016",3], pch=21,bg=my.cols[6])
-points(Q$points[phytos1$EM3=="post-mix 2016",1], Q$points[phytos1$EM3=="post-mix 2016",3], pch=21,bg=my.cols[7])
-points(Q$points[phytos1$EM3=="pre-mix 2017",1], Q$points[phytos1$EM3=="pre-mix 2017",3], pch=21,bg=my.cols[8])
-points(Q$points[phytos1$EM3=="post-EM1 2017",1], Q$points[phytos1$EM3=="post-EM1 2017",3], pch=21,bg=my.cols[9])
-points(Q$points[phytos1$EM3=="pre-EM2 2017",1], Q$points[phytos1$EM3=="pre-EM2 2017",3], pch=21,bg=my.cols[10])
-points(Q$points[phytos1$EM3=="post-EM2 2017",1], Q$points[phytos1$EM3=="post-EM2 2017",3], pch=21,bg=my.cols[11])
-points(Q$points[phytos1$EM3=="post-mix 2017",1], Q$points[phytos1$EM3=="post-mix 2017",3], pch=21,bg=my.cols[12])
-points(Q$points[phytos1$EM3=="2018",1], Q$points[phytos1$EM3=="2018",3], pch=21,bg=my.cols[13])
-points(Q$points[phytos1$EM3=="2019",1], Q$points[phytos1$EM3=="2019",3], pch=21,bg=my.cols[14])
-plot(en)
-legend("topright",legend = c("pre-mix 2016","post-EM1 2016","pre-EM2 2016",
+points(Q$points[phytos1$EM3=="pre-mix 2016",1], Q$points[phytos1$EM3=="pre-mix 2016",3], pch=21,bg=my.cols[1], cex = 2)
+points(Q$points[phytos1$EM3=="post-EM1 2016",1], Q$points[phytos1$EM3=="post-EM1 2016",3], pch=21,bg=my.cols[2], cex = 2)
+points(Q$points[phytos1$EM3=="pre-EM2 2016",1], Q$points[phytos1$EM3=="pre-EM2 2016",3], pch=21,bg=my.cols[3], cex = 2)
+points(Q$points[phytos1$EM3=="post-EM2 2016",1], Q$points[phytos1$EM3=="post-EM2 2016",3], pch=21,bg=my.cols[4], cex = 2)
+points(Q$points[phytos1$EM3=="pre-EM3 2016",1], Q$points[phytos1$EM3=="pre-EM3 2016",3], pch=21,bg=my.cols[5], cex = 2)
+points(Q$points[phytos1$EM3=="post-EM3 2016",1], Q$points[phytos1$EM3=="post-EM3 2016",3], pch=21,bg=my.cols[6], cex = 2)
+points(Q$points[phytos1$EM3=="post-mix 2016",1], Q$points[phytos1$EM3=="post-mix 2016",3], pch=21,bg=my.cols[7], cex = 2)
+points(Q$points[phytos1$EM3=="pre-mix 2017",1], Q$points[phytos1$EM3=="pre-mix 2017",3], pch=21,bg=my.cols[8], cex = 2)
+points(Q$points[phytos1$EM3=="post-EM1 2017",1], Q$points[phytos1$EM3=="post-EM1 2017",3], pch=21,bg=my.cols[9], cex = 2)
+points(Q$points[phytos1$EM3=="pre-EM2 2017",1], Q$points[phytos1$EM3=="pre-EM2 2017",3], pch=21,bg=my.cols[10], cex = 2)
+points(Q$points[phytos1$EM3=="post-EM2 2017",1], Q$points[phytos1$EM3=="post-EM2 2017",3], pch=21,bg=my.cols[11], cex = 2)
+points(Q$points[phytos1$EM3=="post-mix 2017",1], Q$points[phytos1$EM3=="post-mix 2017",3], pch=21,bg=my.cols[12], cex = 2)
+points(Q$points[phytos1$EM3=="2018",1], Q$points[phytos1$EM3=="2018",3], pch=21,bg=my.cols[13], cex = 2)
+points(Q$points[phytos1$EM3=="2019",1], Q$points[phytos1$EM3=="2019",3], pch=21,bg=my.cols[14], cex = 2)
+plot(en13)
+legend("bottomleft",legend = c("pre-mix 2016","post-EM1 2016","pre-EM2 2016",
                              "post-EM2 2016","pre-EM3 2016","post-EM3 2016",
                              "post-mix 2016","pre-mix 2017","post-EM1 2017",
                              "pre-EM2 2017","post-EM2 2017","post-mix 2017",
-                             "2018","2019"), pch = 21, pt.bg = my.cols, bty = "n")
-legend("bottomright",legend = c("k = 0.11"),bty = "n")
+                             "2018","2019"), pch = 21, pt.bg = my.cols, bty = "n", pt.cex = 2)
+legend("topleft",legend = c("k = 0.11"),bty = "n")
 dev.off()
 
 #first and third axes in black and white
 png(filename = "./3_Visualization/NMDS_all_1_3_EM1.png",width = 9,height = 9,units = "in",res = 300)
 plot(Q, display=c('sites','species'),choices=c(1,3), type='n')
-points(Q$points[phytos1$EM1==1,1], Q$points[phytos1$EM1==1,3], pch=21,bg="black")
-points(Q$points[phytos1$EM1==0,1], Q$points[phytos1$EM1==0,3], pch=21,bg="white")
-plot(en)
-legend("topright",legend = c("EM + 2 wks post","no EM"), pch = 21, pt.bg = c("black","white"), bty = "n")
+points(Q$points[phytos1$EM1==1,1], Q$points[phytos1$EM1==1,3], pch=21,bg="black", cex = 2)
+points(Q$points[phytos1$EM1==0,1], Q$points[phytos1$EM1==0,3], pch=21,bg="white", cex = 2)
+plot(en13)
+legend("topright",legend = c("EM + 2 wks post","no EM"), pch = 21, pt.bg = c("black","white"), bty = "n", pt.cex = 2)
 legend("bottomright",legend = c("k = 0.11"),bty = "n")
 dev.off()
 
 #first and third axes in black and white w/ EM coded by year
 png(filename = "./3_Visualization/NMDS_all_1_3_EM2.png",width = 9,height = 9,units = "in",res = 300)
 plot(Q, display=c('sites','species'),choices=c(1,3), type='n')
-points(Q$points[phytos1$EM2==1,1], Q$points[phytos1$EM2==1,3], pch=21,bg="black")
-points(Q$points[phytos1$EM2==0,1], Q$points[phytos1$EM2==0,3], pch=21,bg="white")
-plot(en)
-legend("topright",legend = c("EM years","years w/ no EM"), pch = 21, pt.bg = c("black","white"), bty = "n")
+points(Q$points[phytos1$EM2==1,1], Q$points[phytos1$EM2==1,3], pch=21,bg="black", cex = 2)
+points(Q$points[phytos1$EM2==0,1], Q$points[phytos1$EM2==0,3], pch=21,bg="white", cex = 2)
+plot(en13)
+legend("topright",legend = c("EM years","years w/ no EM"), pch = 21, pt.bg = c("black","white"), bty = "n", pt.cex = 2)
+legend("bottomright",legend = c("k = 0.11"),bty = "n")
+dev.off()
+
+#first and third axes by year
+my.cols <- gg_color_hue(4)
+png(filename = "./3_Visualization/NMDS_all_1_3_year.png",width = 9,height = 9,units = "in",res = 300)
+plot(Q, display=c('sites','species'),choices=c(1,3), type='n')
+points(Q$points[phytos1$Year==2016,1], Q$points[phytos1$Year==2016,3], pch=21,bg=my.cols[1], cex = 2)
+points(Q$points[phytos1$Year==2017,1], Q$points[phytos1$Year==2017,3], pch=21,bg=my.cols[2], cex = 2)
+points(Q$points[phytos1$Year==2018,1], Q$points[phytos1$Year==2018,3], pch=21,bg=my.cols[3], cex = 2)
+points(Q$points[phytos1$Year==2019,1], Q$points[phytos1$Year==2019,3], pch=21,bg=my.cols[4], cex = 2)
+plot(en13)
+legend("topright",legend = c("2016","2017","2018","2019"), pch = 21, pt.bg = my.cols, bty = "n", pt.cex = 2)
 legend("bottomright",legend = c("k = 0.11"),bty = "n")
 dev.off()
 
@@ -190,26 +227,26 @@ dev.off()
 my.cols <- gg_color_hue(5)
 png(filename = "./3_Visualization/NMDS_all_1_2_month.png",width = 9,height = 9,units = "in",res = 300)
 plot(Q, display=c('sites','species'),choices=c(1,2), type='n')
-points(Q$points[phytos1$Month==5,1], Q$points[phytos1$Month==5,2], pch=21,bg=my.cols[1])
-points(Q$points[phytos1$Month==6,1], Q$points[phytos1$Month==6,2], pch=21,bg=my.cols[2])
-points(Q$points[phytos1$Month==7,1], Q$points[phytos1$Month==7,2], pch=21,bg=my.cols[3])
-points(Q$points[phytos1$Month==8,1], Q$points[phytos1$Month==8,2], pch=21,bg=my.cols[4])
-points(Q$points[phytos1$Month==9,1], Q$points[phytos1$Month==9,2], pch=21,bg=my.cols[5])
-plot(en)
-legend("topright", legend=c('May','June', 'July','Aug','Sept'), pch=21, pt.bg=c(my.cols),bty = "n") 
+points(Q$points[phytos1$Month==5,1], Q$points[phytos1$Month==5,2], pch=21,bg=my.cols[1], cex = 2)
+points(Q$points[phytos1$Month==6,1], Q$points[phytos1$Month==6,2], pch=21,bg=my.cols[2], cex = 2)
+points(Q$points[phytos1$Month==7,1], Q$points[phytos1$Month==7,2], pch=21,bg=my.cols[3], cex = 2)
+points(Q$points[phytos1$Month==8,1], Q$points[phytos1$Month==8,2], pch=21,bg=my.cols[4], cex = 2)
+points(Q$points[phytos1$Month==9,1], Q$points[phytos1$Month==9,2], pch=21,bg=my.cols[5], cex = 2)
+plot(en12)
+legend("topleft", legend=c('May','June', 'July','Aug','Sept'), pch=21, pt.bg=c(my.cols),bty = "n", pt.cex = 2) 
 legend("bottomright",legend = c("k = 0.11"),bty = "n")
 dev.off()
 
 #first and third axes
 png(filename = "./3_Visualization/NMDS_all_1_3_month.png",width = 9,height = 9,units = "in",res = 300)
 plot(Q, display=c('sites','species'),choices=c(1,3), type='n')
-points(Q$points[phytos1$Month==5,1], Q$points[phytos1$Month==5,3], pch=21,bg=my.cols[1])
-points(Q$points[phytos1$Month==6,1], Q$points[phytos1$Month==6,3], pch=21,bg=my.cols[2])
-points(Q$points[phytos1$Month==7,1], Q$points[phytos1$Month==7,3], pch=21,bg=my.cols[3])
-points(Q$points[phytos1$Month==8,1], Q$points[phytos1$Month==8,3], pch=21,bg=my.cols[4])
-points(Q$points[phytos1$Month==9,1], Q$points[phytos1$Month==9,3], pch=21,bg=my.cols[5])
-plot(en)
-legend("topright", legend=c('May','June', 'July','Aug','Sept'), pch=21, pt.bg=c(my.cols),bty = "n") 
+points(Q$points[phytos1$Month==5,1], Q$points[phytos1$Month==5,3], pch=21,bg=my.cols[1], cex = 2)
+points(Q$points[phytos1$Month==6,1], Q$points[phytos1$Month==6,3], pch=21,bg=my.cols[2], cex = 2)
+points(Q$points[phytos1$Month==7,1], Q$points[phytos1$Month==7,3], pch=21,bg=my.cols[3], cex = 2)
+points(Q$points[phytos1$Month==8,1], Q$points[phytos1$Month==8,3], pch=21,bg=my.cols[4], cex = 2)
+points(Q$points[phytos1$Month==9,1], Q$points[phytos1$Month==9,3], pch=21,bg=my.cols[5], cex = 2)
+plot(en13)
+legend("topleft", legend=c('May','June', 'July','Aug','Sept'), pch=21, pt.bg=c(my.cols),bty = "n", pt.cex = 2) 
 legend("bottomright",legend = c("k = 0.11"),bty = "n")
 dev.off()
 
@@ -219,6 +256,7 @@ png(filename = "./3_Visualization/NMDS_all_1_2_genera.png",width = 9,height = 9,
 fig <- ordiplot(Q, choices = c(1,2))
 points(Q$points[phytos1$EM1==1,1], Q$points[phytos1$EM1==1,2], pch=21,bg='black')
 text(fig, "species", col="blue", cex=0.6)
+plot(en12, col = "red")
 legend("topright",legend = c("EM + 2 wks post","no EM"), pch = 21, pt.bg = c("black","white"), bty = "n")
 dev.off()
 
@@ -226,6 +264,7 @@ png(filename = "./3_Visualization/NMDS_all_1_3_genera.png",width = 9,height = 9,
 fig <- ordiplot(Q, choices = c(1,3))
 points(Q$points[phytos1$EM1==1,1], Q$points[phytos1$EM1==1,3], pch=21,bg='black')
 text(fig, "species", col="blue", cex=0.6)
+plot(en13, col = "red")
 legend("topright",legend = c("EM + 2 wks post","no EM"), pch = 21, pt.bg = c("black","white"), bty = "n")
 dev.off()
 
