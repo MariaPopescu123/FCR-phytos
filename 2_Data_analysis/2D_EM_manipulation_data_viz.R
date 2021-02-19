@@ -20,14 +20,19 @@ my.cs.data <- read_csv("./2_Data_analysis/CS_megamatrix.csv") %>%
   select(Date,shannon:BV_TOTAL)
 
 mydata <- left_join(my.fp.data,my.cs.data, by = "Date") %>%
-  mutate(Year = as.factor(Year),
+  mutate(Year = as.factor(Year), MonthDay = format(Date, format="%m-%d"),
          Peak_depth_m = ifelse(Peak_depth_m > 9, NA, Peak_depth_m)) 
 
-p1 <- ggplot(data = mydata, aes(x = MonthDay, y = EM, group = Year, color = Year))+
+p1 <- ggplot(data = mydata, aes(x = MonthDay, y = EM3, group = Year, color = Year))+
   geom_line(size = 2)+
   scale_x_discrete(breaks = c("05-01","06-01","07-01","08-01","09-01","10-01"))+
   theme_classic()
 p1
+
+my.aov <- aov(thermo.depth ~ as.factor(EM3), data = mydata)
+summary(my.aov)
+my.tukey <- TukeyHSD(my.aov)
+my.tukey
 
 p2 <- ggplot(data = mydata, aes(x = MonthDay, y = thermo.depth, group = Year, color = Year))+
   geom_line(size = 2)+
@@ -40,7 +45,9 @@ summary(my.aov)
 my.tukey <- TukeyHSD(my.aov)
 my.tukey
 
-t.test(thermo.depth ~ EM, data = mydata)
+t.test(thermo.depth ~ EM1, data = mydata)
+t.test(thermo.depth ~ EM2, data = mydata)
+
 
 
 p3 <- ggplot(data = mydata, aes(x = MonthDay, y = Peak_depth_m, group = Year, color = Year))+
@@ -49,12 +56,14 @@ p3 <- ggplot(data = mydata, aes(x = MonthDay, y = Peak_depth_m, group = Year, co
   theme_classic()
 p3
 
-my.aov <- aov(Peak_depth_m ~ Year, data = mydata)
+my.aov <- aov(Peak_depth_m ~ as.factor(EM3), data = mydata)
 summary(my.aov)
 my.tukey <- TukeyHSD(my.aov)
 my.tukey
 
-t.test(Peak_depth_m ~ EM, data = mydata)
+t.test(Peak_depth_m ~ EM1, data = mydata)
+t.test(Peak_depth_m ~ EM2, data = mydata)
+
 
 
 em <- subset(mydata, Year %in% c(2016,2017))
@@ -68,12 +77,14 @@ p4 <- ggplot(data = mydata, aes(x = MonthDay, y = schmidt.stability, group = Yea
   theme_classic()
 p4
 
-my.aov <- aov(schmidt.stability ~ Year, data = mydata)
+my.aov <- aov(schmidt.stability ~ as.factor(EM3), data = mydata)
 summary(my.aov)
 my.tukey <- TukeyHSD(my.aov)
 my.tukey
 
-t.test(schmidt.stability ~ EM, data = mydata)
+t.test(schmidt.stability ~ EM1, data = mydata)
+t.test(schmidt.stability ~ EM2, data = mydata)
+
 
 
 p5 <- ggplot(data = mydata, aes(x = MonthDay, y = rel_abund_Cyanobacteria, group = Year, color = Year))+
@@ -101,7 +112,7 @@ p8 <- ggplot(data = mydata, aes(x = MonthDay, y = richness, group = Year, color 
 p8
 
 ##THIS NEEDS TO BE EDITED NOW THAT HAVE PERC LIGHT AT THERMOCLINE
-for (i in c(5:22,24:32)){
+for (i in c(7:20)){
   var <- colnames(mydata[,i])
 pa <- ggplot(data = mydata, aes_string(x = var, group = "Year", color = "Year", fill = "Year"))+
   geom_density(alpha = 0.5)+
@@ -110,13 +121,13 @@ print(pa)
 
 print(var)
 my.var <- unlist(mydata[,i])
-# my.aov <- aov(my.var ~ mydata$Year)
-# print(summary(my.aov))
-# my.tukey <- TukeyHSD(my.aov)
-# print(my.tukey)
-# 
-# print(t.test(my.var ~ EM, data = mydata))
-print(t.test(my.var ~ HOx, data = mydata))
+my.aov <- aov(my.var ~ as.factor(mydata$EM3))
+print(summary(my.aov))
+my.tukey <- TukeyHSD(my.aov)
+print(my.tukey)
+
+# print(t.test(my.var ~ EM2, data = mydata))
+# print(t.test(my.var ~ HOx, data = mydata))
 
 }
 #DOCmax_mgL not significant, but looks like maybe fairly different

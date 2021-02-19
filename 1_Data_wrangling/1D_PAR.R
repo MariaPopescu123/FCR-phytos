@@ -9,7 +9,7 @@
 
 #load packages
 #install.packages('pacman')
-pacman::p_load(tidyverse, lubridate)
+pacman::p_load(tidyverse, lubridate, data.table)
 rm(list=ls())
 
 #read in sample dates and depths of phyto samples
@@ -63,12 +63,18 @@ fp_sample <- fp_sample %>%
 fp_sample <- fp_sample[-81,]
 
 #read in CTD data and limit to PAR
-ctd <- read_csv("./00_Data_files/CTD.csv",
-                col_types = cols(PAR_umolm2s = col_double())) %>%
+# data  <- "https://portal.edirepository.org/nis/dataviewer?packageid=edi.200.11&entityid=d771f5e9956304424c3bc0a39298a5ce"
+# 
+# destination <- "./00_Data_files"
+# 
+# download.file(data, destfile = "./00_Data_files/CTD.csv", method='libcurl')
+ctd <- fread("./00_Data_files/CTD.csv")
+ctd <- data.frame(ctd) %>%
   select(Reservoir, Site, Date, Depth_m, PAR_umolm2s) %>%
   filter(Reservoir == "FCR" & Site == 50 & date(Date) %in% sample_info$Date) %>%
   mutate(Hour = hour(Date),
-         Date = date(Date))
+         Date = date(Date),
+         PAR_umolm2s = as.double(PAR_umolm2s))
 
 #select casts that are closest in time to FP casts
 #Write a function that returns the closest value
@@ -241,7 +247,8 @@ write.csv(Kd2, "./00_Data_files/Kd.csv",row.names = FALSE)
 Kd <- read_csv("./00_Data_files/Kd.csv")
 
 Kd_plot <- Kd %>%
-  gather(CTD_Kd:YSI_Kd, key = "sensor",value = "Kd") %>%
+  select(Date, CTD_Kd, YSI_Kd)%>%
+  gather(CTD_Kd,YSI_Kd, key = "sensor",value = "Kd") %>%
   mutate(Year = year(Date))
 
 ggplot(data = Kd_plot, aes(x = Kd, group = sensor, color = sensor, fill = sensor))+
@@ -249,6 +256,21 @@ ggplot(data = Kd_plot, aes(x = Kd, group = sensor, color = sensor, fill = sensor
   theme_classic()
 
 ggplot(data = Kd_plot, aes(x = Date, y = Kd, color = sensor, group = sensor))+
+  facet_wrap(vars(Year), scales = "free")+
+  geom_point(size = 2)+
+  geom_line(size = 1)+
+  theme_classic()
+
+perc_light_plot <- Kd %>%
+  select(Date, CTD_perc_light_thermocline, YSI_perc_light_thermocline)%>%
+  gather(CTD_perc_light_thermocline,YSI_perc_light_thermocline, key = "sensor",value = "perc_light_thermocline") %>%
+  mutate(Year = year(Date))
+
+ggplot(data = perc_light_plot, aes(x = perc_light_thermocline, group = sensor, color = sensor, fill = sensor))+
+  geom_density(alpha = 0.3)+
+  theme_classic()
+
+ggplot(data = perc_light_plot, aes(x = Date, y = perc_light_thermocline, color = sensor, group = sensor))+
   facet_wrap(vars(Year), scales = "free")+
   geom_point(size = 2)+
   geom_line(size = 1)+
