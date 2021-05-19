@@ -97,7 +97,8 @@ write.csv(hoxem, file = "./00_Data_files/HOx_EM_operation.csv", row.names = FALS
 
 #preliminary visualization
 hoxem <- read_csv("./00_Data_files/HOx_EM_operation.csv") %>%
-  mutate(Year = as.factor(year(Date)))
+  mutate(Year = as.factor(year(Date))) %>%
+  filter(month(Date) %in% c(5:9))
 
 ggplot(data = hoxem, aes(x = Date, y = HOx))+
   facet_wrap(vars(Year), scales = "free")+

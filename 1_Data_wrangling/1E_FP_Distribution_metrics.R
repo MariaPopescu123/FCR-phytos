@@ -90,9 +90,11 @@ dates <- unique(fp_sample$Date)
 
 final <- matrix(NA,nrow = 98, ncol = 5)
 
+#use i = 63 for supplement figure example of peak width
+
 for (i in 1:length(dates)){
   #source dependent scripts
-  source('./0_Function_library/Script_S2_GND_fit_functions.R')
+  #source('./0_Function_library/Script_S2_GND_fit_functions.R')
   
   profile <- fp_sample %>%
     filter(Date == dates[i])
@@ -100,31 +102,68 @@ for (i in 1:length(dates)){
   final[i,1]<- as.character(dates[i])
   final[i,2]<- unlist(profile[which.max(profile$TotalConc_ugL),"TotalConc_ugL"])
   final[i,3]<- unlist(profile[which.max(profile$TotalConc_ugL),"Depth_m"])
-  final[i,4]<- max(profile$TotalConc_ugL, na.rm = TRUE) - median(profile$TotalConc_ugL, na.rm = TRUE)
+  final[i,4]<- max(profile$TotalConc_ugL, na.rm = TRUE) - mean(profile$TotalConc_ugL, na.rm = TRUE)
   
-  #calculate DCM fit
-  DCM.fit = fit.GND(profile$Depth_m, profile$TotalConc_ugL)
-  DCM.depth  = DCM.fit$par[3]
-  DCM.std    = DCM.fit$par[4]
-  # calculate DCM top depth, will set to 0 if this is above surface of lake
-  DCM.breadth.top = c()
-  if (DCM.depth - DCM.std < 0) {
-    DCM.breadth.top = 0
-  } else if (DCM.depth - DCM.std >= 0) {
-    DCM.breadth.top = DCM.depth - DCM.std
-  }
-  # calculate the DCM bottom depth, will set to max. depth of profile if below
-  DCM.breadth.bottom = c() # 
-  if (DCM.depth + DCM.std > max(profile$Depth_m)) {
-    DCM.breadth.bottom = max(profile$Depth_m)
+  # #calculate DCM fit
+  # DCM.fit = fit.GND(profile$Depth_m, profile$TotalConc_ugL)
+  # DCM.depth  = DCM.fit$par[3]
+  # DCM.std    = DCM.fit$par[4]
+  # # calculate DCM top depth, will set to 0 if this is above surface of lake
+  # DCM.breadth.top = c()
+  # if (DCM.depth - DCM.std < 0) {
+  #   DCM.breadth.top = 0
+  # } else if (DCM.depth - DCM.std >= 0) {
+  #   DCM.breadth.top = DCM.depth - DCM.std
+  # }
+  # # calculate the DCM bottom depth, will set to max. depth of profile if below
+  # DCM.breadth.bottom = c() # 
+  # if (DCM.depth + DCM.std > max(profile$Depth_m)) {
+  #   DCM.breadth.bottom = max(profile$Depth_m)
+  # } else {
+  #   DCM.breadth.bottom = DCM.depth + DCM.std
+  # }
+  # # calculate peak width
+  # peak.width = DCM.breadth.bottom - DCM.breadth.top
+  # 
+  #final[i,5] <- peak.width
+  
+  #alternative peak width calculation
+  max_depth <- unlist(profile[which.max(profile$TotalConc_ugL),"Depth_m"])
+  conc_med <- mean(profile$TotalConc_ugL, na.rm = TRUE)
+  
+  peak.top.temp <- subset(profile, Depth_m <= max_depth & TotalConc_ugL <= conc_med)
+  if(nrow(peak.top.temp) == 0){
+    peak.top = min(profile$Depth_m, na.rm = TRUE)
   } else {
-    DCM.breadth.bottom = DCM.depth + DCM.std
+    peak.top <- unlist(peak.top.temp[which.min(abs(peak.top.temp$Depth_m - max_depth)),"Depth_m"])
   }
-  # calculate peak width
-  peak.width = DCM.breadth.bottom - DCM.breadth.top
+
+  peak.bottom.temp <- subset(profile, Depth_m >= max_depth & TotalConc_ugL <= conc_med)
+  if(nrow(peak.bottom.temp) == 0){
+    peak.bottom = max(profile$Depth_m, na.rm = TRUE)
+  } else {
+    peak.bottom <- unlist(peak.bottom.temp[which.min(abs(peak.bottom.temp$Depth_m - max_depth)),"Depth_m"])
+    }
   
+
+  peak.width = abs(peak.top - peak.bottom)
   final[i,5] <- peak.width
   
+  max_conc <- max(profile$TotalConc_ugL, na.rm = TRUE)
+  max_conc_depth <- as.numeric(final[i,3])
+  
+  # print(ggplot()+
+  #   geom_path(data = profile, aes(x = TotalConc_ugL, y = Depth_m), color = "darkgreen",size = 1.5)+
+  #   geom_segment(aes(y = peak.top, x = conc_med, yend = peak.bottom, xend = conc_med, colour = "red"), show.legend = FALSE, size = 2)+
+  #   geom_vline(aes(xintercept = conc_med, colour = "red"), show.legend = FALSE, size = 1, lty = "dashed")+
+  #   geom_point(aes(x = max_conc, y = max_conc_depth),size = 4, colour = "blue")+
+  #   scale_y_reverse()+
+  #   xlab(expression(paste("Biomass ","(",mu,g,~L^-1,")",sep = "")))+
+  #   ylab("Depth (m)")+
+  #   ggtitle(profile$Date[1])+
+  #   theme_classic())+
+  #   theme(axis.title = element_text(size = 14),axis.text = element_text(size = 14))
+  # 
 }
 
 final <- data.frame(final)
@@ -149,7 +188,7 @@ final <- final %>%
          Peak_depth_m = as.numeric(Peak_depth_m),
          Peak_magnitude_ugL = as.numeric(Peak_magnitude_ugL),
          Peak_width_m = as.numeric(Peak_width_m))
-
+final$Peak_width_m[97:98] <- NA
 #note there are only 98 rows here but should be ok when left-join to phyto samples
 write.csv(final, "./00_Data_files/FP_DistributionMetrics.csv", row.names = FALSE)
 
@@ -158,10 +197,10 @@ final <- read_csv("./00_Data_files/FP_DistributionMetrics.csv")
 
 ##PLOTTING
 final1 <- final %>%
+  select(-Peak_magnitude_ugL) %>%
   mutate(Date = as.Date(Date),
          Max_biomass_ugL = as.numeric(Max_biomass_ugL),
          Peak_depth_m = as.numeric(Peak_depth_m),
-         Peak_magnitude_ugL = as.numeric(Peak_magnitude_ugL),
          Peak_width_m = as.numeric(Peak_width_m)) %>%
   gather(Max_biomass_ugL:Peak_width_m, key = "Dist_var",value = "value") %>%
   mutate(Year = year(Date))
@@ -175,10 +214,9 @@ vars
 ggsave(vars, filename = "./Exploratory_viz/FP_dist_vars.png",
        height = 5, width = 6, units = "in", device = "png")
 
-final1$Dist_var <- factor(final1$Dist_var, levels = c("Max_biomass_ugL","Peak_depth_m","Peak_magnitude_ugL","Peak_width_m"),
+final1$Dist_var <- factor(final1$Dist_var, levels = c("Max_biomass_ugL","Peak_depth_m","Peak_width_m"),
                    ordered = TRUE, labels=c(expression(paste("Maximum biomass ","(",mu,g,~L^-1,")")),
                                             expression(paste("Peak depth (m)")), 
-                                            expression(paste("Peak magnitude ","(",mu,g,~L^-1,")")),
                                             expression(paste("Peak width (m)"))))
 final1$Year <- as.factor(final1$Year)
 
@@ -228,9 +266,9 @@ ggsave(plot = vars4, filename = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_v
 yrs <- unique(final1$Year)
 dist_vars <- unique(final1$Dist_var)
 
-png(file = "./Exploratory_viz/FP_pacf.png",width = 16, height = 16,
+png(file = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/FP_pacf.png",width = 16, height = 16,
     units = "cm",res = 300)
-par(mfrow = c(4,4), mgp = c(2,0.5,0),mar = c(4,3,3,1))
+par(mfrow = c(4,3), mgp = c(2,0.5,0),mar = c(3,3,3,1))
 
 for (j in 1:length(yrs)){
   for (k in 1:length(dist_vars)){
@@ -241,9 +279,9 @@ for (j in 1:length(yrs)){
     
     myacf <- acf(mydata$value, 
                 type = "partial",
-                plot = FALSE)
+                plot = FALSE, na.action = na.pass)
     plot(myacf,main = "")
-    title(c(yrs[j],dist_vars[k]),line = 1)
+    title(yrs[j],line = 1)
     
   }
   
@@ -251,4 +289,6 @@ for (j in 1:length(yrs)){
 
 dev.off()
 
+#dates w/ bad peak width
 
+c("2019-11-20","2019-11-08",)

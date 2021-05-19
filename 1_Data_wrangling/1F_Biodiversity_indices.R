@@ -140,3 +140,109 @@ for (j in 1:length(yrs)){
 
 dev.off()
 
+##get monthly B-C and Jac
+#data wrangling to get input matrix for vegan functions
+phytos <- read_csv("./00_Data_files/EDI_phytos/phytoplankton.csv") %>%
+  select(Date, Genus, BV_um3mL) %>%
+  mutate(YM = format(as.Date(Date), "%Y-%m")) %>%
+  select(-Date) %>% 
+  group_by(YM, Genus) %>%
+  summarize(month_BV_um3mL = sum(BV_um3mL, na.rm = TRUE)) %>%
+  spread(key = Genus, value = month_BV_um3mL)
+
+phytos[is.na(phytos)]<- 0
+
+phytos1 <- phytos %>%
+  ungroup() %>%
+  select(-YM)
+
+phytos2 <- as.matrix(phytos1)
+
+
+#calculate Bray-Curtis distance
+bc <- as.matrix(vegdist(phytos2, method="bray", binary=FALSE, diag=FALSE, upper=FALSE, na.rm = TRUE))
+
+#ok now only calculate the change from week to week
+
+final <- NULL
+
+for (i in 1:28){
+  final <- c(final, bc[i,i+1])
+}
+
+#elements that are skipping across a winter and should be NA
+#23, 46, 66
+
+final[c(1,6,7,8,13,18:22,27:29)] <- NA
+
+braycurtis <- data.frame(final)
+colnames(braycurtis) <- "braycurtis"
+
+
+BD3 <- bind_cols(phytos$YM, braycurtis)
+
+#calculate Jaccard distance
+jac <- as.matrix(vegdist(phytos2, method="jaccard", binary=TRUE, diag=FALSE, upper=FALSE, na.rm = TRUE))
+
+#ok now only calculate the change from week to week
+
+final <- NULL
+
+for (i in 1:928){
+  final <- c(final, jac[i,i+1])
+}
+
+#elements that are skipping across a winter and should be NA
+#23, 46, 66
+
+final[c(1,6,7,8,13,18:22,27:29)] <- NA
+
+jaccard <- data.frame(final)
+colnames(jaccard) <- "jaccard"
+
+BD4 <- bind_cols(BD3, jaccard)
+colnames(BD4)[1] <- "Year-Month"
+
+write.csv(BD4, "./00_Data_files/Biodiversity_monthly.csv",row.names = FALSE)
+
+##A-D tests
+mydata <- BD4
+colnames(mydata)
+vars <- mydata[,c(2:3)] %>%
+  filter(!is.na(jaccard))
+
+final <- matrix(NA, nrow = length(c(2:3)), ncol = 7)
+
+for (i in 1:2){
+  
+  my.var <- unlist(vars[i])
+  final[i,1] <- colnames(vars)[i]
+  
+  em <- my.var[1:8]
+  no_em <- my.var[9:16]
+  
+  my.ad <- ad.test(em, no_em)
+  
+  final[i,2] <- my.ad$ad[[5]]
+  
+  final[i,4] <- mean(no_em, na.rm = TRUE)
+  final[i,5] <- mean(em, na.rm = TRUE)
+  final[i,6] <- sd(no_em, na.rm = TRUE)
+  final[i,7] <- sd(em, na.rm = TRUE)
+  
+}
+
+final[,3] <- p.adjust(final[,2], method = "holm")
+final <- data.frame(final) %>%
+  mutate(X2 = as.numeric(X2),
+         X3 = as.numeric(X3),
+         X4 = as.numeric(X4),
+         X5 = as.numeric(X5),
+         X6 = as.numeric(X6),
+         X7 = as.numeric(X7))
+colnames(final) <- c("Driver","AD_p","adj_AD_p","mean_no_EM","mean_EM","SD_no_EM","SD_EM")
+#write.csv(final, "./2_Data_analysis/Anderson_Darling_results.csv",row.names = FALSE)
+final <- final %>%
+  filter(adj_AD_p <= 0.05)
+
+

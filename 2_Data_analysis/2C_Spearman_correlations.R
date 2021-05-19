@@ -19,9 +19,10 @@ my.cs.data <- read_csv("./2_Data_analysis/CS_megamatrix.csv") %>%
   mutate(MonthDay = format(Date, format="%m-%d")) %>%
   filter(MonthDay >= "05-01" & MonthDay <= "09-20") %>%
   select(-MonthDay) %>%
-  select(Date,shannon:BV_TOTAL)
+  select(Date,shannon:BV_TOTAL)  %>%
+  filter(!is.na(BV_TOTAL)) 
 
-mydata <- left_join(my.fp.data,my.cs.data, by = "Date")
+mydata <- left_join(my.cs.data, my.fp.data, by = "Date")
 
 mega <- mydata %>%
   select(Max_biomass_ugL:BV_TOTAL, Year,Date) 
@@ -169,3 +170,55 @@ cols = gg_color_hue(n)
 
 dev.new(width = 4, height = 4)
 plot(1:n, pch = 16, cex = 2, col = cols)
+
+######spearman correlations for peak depth
+colnames(mydata)
+# columns 25-43 are environmental drivers
+
+for (i in 25:43){
+  rho <- cor(mydata[i], mydata$Peak_depth_m, method = "spearman", use = "complete.obs")
+  print(colnames(mydata[i]))
+  print(rho)
+}
+# variables where |rho| > 0.5:
+# schmidt.stability -0.571112
+# Temp_C -0.6840545
+# Cmax_DOC_mgL -0.5849501
+plot(mydata$schmidt.stability, mydata$Peak_depth_m)
+plot(mydata$Temp_C, mydata$Peak_depth_m)
+plot(mydata$SRPmax_depth_m, mydata$Peak_depth_m)
+plot(mydata$DOCmax_mgL, mydata$Peak_depth_m)
+plot(mydata$thermo.depth, mydata$Peak_depth_m)
+cor(mydata$Temp_C, mydata$schmidt.stability, method = "spearman", use = "complete.obs")
+cor(mydata$Temp_C, mydata$Cmax_DOC_mgL, method = "spearman", use = "complete.obs")
+cor(mydata$schmidt.stability, mydata$Cmax_DOC_mgL, method = "spearman", use = "complete.obs")
+hist(mydata$Temp_C)
+hist(mydata$schmidt.stability)
+hist(mydata$Cmax_DOC_mgL)
+
+x <- mydata$DOCmax_depth_m
+x2 <- mydata$DOCmax_depth_m^2
+y <- mydata$Peak_depth_m
+quad_mod <- lm(y~x + x2)
+round(summary(quad_mod)$adj.r.squared,2)
+
+x <- mydata$SRPmax_depth_m
+y <- mydata$Peak_depth_m
+lin_mod <- lm(y~x)
+round(summary(lin_mod)$adj.r.squared,2)
+
+x <- mydata$Peak_depth_m
+y <- mydata$Cmax_DOC_mgL
+lin_mod <- lm(y~x)
+round(summary(lin_mod)$adj.r.squared,2)
+
+d2019 <- mydata %>%
+  filter(Year == 2019)
+
+for (i in 25:43){
+  rho <- cor(d2019[i], d2019$Peak_depth_m, method = "spearman", use = "complete.obs")
+  print(rho)
+}
+plot(d2019$Temp_C, d2019$Peak_depth_m)
+hist(mydata$Peak_depth_m)
+

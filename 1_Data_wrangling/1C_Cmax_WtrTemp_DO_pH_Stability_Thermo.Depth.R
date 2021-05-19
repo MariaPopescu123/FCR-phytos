@@ -6,7 +6,7 @@
 
 #load packages
 #install.packages('pacman')
-pacman::p_load(tidyverse, lubridate, rLakeAnalyzer)
+pacman::p_load(tidyverse, lubridate, rLakeAnalyzer, data.table)
 rm(list=ls())
 
 # #download data from EDI
@@ -24,6 +24,11 @@ rm(list=ls())
 # destination <- "./00_Data_files"
 # 
 # download.file(data,destfile = "./00_Data_files/SCC.csv", method='libcurl')
+
+data  <- "https://portal.edirepository.org/nis/dataviewer?packageid=edi.389.5&entityid=3d1866fecfb8e17dc902c76436239431"
+destination <- "./00_Data_files"
+
+download.file(data,destfile = "./00_Data_files/met.csv", method='libcurl')
 
 #read in sample dates and depths of phyto samples
 sample_info <- read_csv("./00_Data_files/EDI_phytos/phytoplankton.csv") %>%
@@ -75,9 +80,10 @@ fp_sample <- fp_sample %>%
   distinct(Date,Hour)
 fp_sample <- fp_sample[-81,]
 
-#read in CTD data and limit to temperature
-ctd <- read_csv("./00_Data_files/CTD.csv") %>%
-  select(Reservoir, Site, Date, Depth_m, Temp_C) %>%
+#read in CTD data and limit to temperature, DO, pH
+ctd <- fread("./00_Data_files/CTD.csv")
+ctd <- tibble(ctd) %>%
+  select(Reservoir, Site, Date, Depth_m, Temp_C, DO_mgL, pH) %>%
   filter(Reservoir == "FCR" & Site == 50 & date(Date) %in% sample_info$Date) %>%
   mutate(Hour = hour(Date),
          Date = date(Date))
@@ -131,7 +137,7 @@ ctd_new$Depth_m <- round(as.numeric(ctd_new$Depth_m), digits = 0.5)
 
 #fix a couple of wonky depths
 ctd_new$Depth_m[59:60] <- 9.0
-ctd_new <- ctd_new[-c(39:40,60),]
+ctd_new <- ctd_new[-c(39:40,60,298:300),]
 
 #cleaning casts where measurements don't start until deeper in water column
 ctd_new <- ctd_new %>%
@@ -176,11 +182,41 @@ ggplot(data = td_ctd1, aes(x = datetime, y = thermo.depth))+
   scale_y_reverse()+
   theme_classic()
 
+#calculate buoyancy frequency
+bf_ctd <- ts.buoyancy.freq(wtr = wtr_ctd, na.rm = TRUE, seasonal = TRUE) 
+
+bf_ctd1 <- bf_ctd %>%
+  mutate(Year = year(datetime))
+
+ggplot(data = bf_ctd1, aes(x = datetime, y = n2))+
+  facet_wrap(vars(Year), scales = "free")+
+  geom_line(size = 1)+
+  scale_y_reverse()+
+  theme_classic()
+
+#calculate metalimnion depths
+meta_ctd <- ts.meta.depths(wtr = wtr_ctd, na.rm = TRUE, seasonal = TRUE)
+mean(meta_ctd$top, na.rm = TRUE)
+mean(meta_ctd$bottom, na.rm = TRUE)
+
 #find water temperature at depth of Cmax
 cmax <- read_csv("./00_Data_files/FP_DistributionMetrics.csv")
 
 depths = cmax$Peak_depth_m
 dates  = cmax$Date
+
+final <- ctd[0,]
+
+ctd_dates <- unique(ctd$Date)
+for (i in 1:length(ctd_dates)){
+  ctd_sample <- subset(ctd, ctd$Date == ctd_dates[i])
+  fp_hour <- subset(fp_sample, fp_sample$Date == ctd_dates[i])
+  ctd_profile <- ctd_sample[ctd_sample[, "Hour"] == closest(ctd_sample$Hour,fp_hour$Hour[1]),]
+  final <- bind_rows(final, ctd_profile)
+}
+
+final <- final %>%
+  select(Date, Depth_m, Temp_C, DO_mgL, pH)
 
 df.final<-data.frame()
 
@@ -196,16 +232,55 @@ for (i in 1:length(dates)){
   
 }
 
+grab_depths = sample_info$Depth_m
+grab_dates = sample_info$Date
+
+final.grab <- ctd[0,]
+
+ctd_dates <- unique(ctd$Date)
+for (i in 1:length(ctd_dates)){
+  ctd_sample <- subset(ctd, ctd$Date == ctd_dates[i])
+  fp_hour <- subset(fp_sample, fp_sample$Date == ctd_dates[i])
+  ctd_profile <- ctd_sample[ctd_sample[, "Hour"] == closest(ctd_sample$Hour,fp_hour$Hour[1]),]
+  final.grab <- bind_rows(final.grab, ctd_profile)
+}
+
+final.grab <- final.grab %>%
+  select(Date, Depth_m, Temp_C)
+
+df.final.grab<-data.frame()
+
+for (i in 1:length(grab_dates)){
+  
+  profile <- final.grab %>%
+    filter(Date == grab_dates[i])
+  
+  ctd_layer<-profile %>% group_by(Date) %>% slice(which.min(abs(as.numeric(Depth_m) - grab_depths[i])))
+  
+  # Bind each of the data layers together.
+  df.final.grab = bind_rows(df.final.grab, ctd_layer)
+  
+}
+colnames(df.final.grab) <-c("Date","Grab_T_Depth_m","Grab_Depth_Temp_C")
+
+check <- left_join(df.final.grab,sample_info,by = "Date")
+
+
 colnames(ss_ctd)[1] <- "Date"
 colnames(td_ctd)[1] <- "Date"
+colnames(bf_ctd)[1] <- "Date"
+
 
 ctd_all <- left_join(df.final, ss_ctd, by = "Date")
-ctd_final <- left_join(ctd_all, td_ctd, by = "Date")
+ctd_all1 <- left_join(ctd_all, td_ctd, by = "Date")
+ctd_all2 <- left_join(ctd_all1,df.final.grab, by = "Date")
+ctd_final <- left_join(ctd_all2, bf_ctd, by = "Date")
+
 
 
 #read in YSI data and limit to temperature
 ysi <- read_csv("./00_Data_files/YSI.csv") %>%
-  select(Reservoir, Site, DateTime, Depth_m, Temp_C) %>%
+  select(Reservoir, Site, DateTime, Depth_m, Temp_C, DO_mgL, pH) %>%
   mutate(Date = as.POSIXct(DateTime, format = "%m/%d/%y %H:%M")) %>%
   select(-DateTime)%>%
   filter(Reservoir == "FCR" & Site == 50 & date(Date) %in% sample_info$Date) %>%
@@ -304,11 +379,36 @@ ggplot(data = td_ysi1, aes(x = datetime, y = thermo.depth))+
   scale_y_reverse()+
   theme_classic()
 
+#calculate buoyancy frequency
+bf_ysi <- ts.buoyancy.freq(wtr = wtr_ysi, na.rm = TRUE, seasonal = TRUE) 
+
+bf_ysi1 <- bf_ysi %>%
+  mutate(Year = year(datetime))
+
+ggplot(data = bf_ysi1, aes(x = datetime, y = n2))+
+  facet_wrap(vars(Year), scales = "free")+
+  geom_line(size = 1)+
+  scale_y_reverse()+
+  theme_classic()
+
 #find water temperature at depth of Cmax
 cmax <- read_csv("./00_Data_files/FP_DistributionMetrics.csv")
 
 depths = cmax$Peak_depth_m
 dates  = cmax$Date
+
+final <- ysi[0,]
+
+ysi_dates <- unique(ysi$Date)
+for (i in 1:length(ysi_dates)){
+  ysi_sample <- subset(ysi, ysi$Date == ysi_dates[i])
+  fp_hour <- subset(fp_sample, fp_sample$Date == ysi_dates[i])
+  ysi_profile <- ysi_sample[ysi_sample[, "Hour"] == closest(ysi_sample$Hour,fp_hour$Hour[1]),]
+  final <- bind_rows(final, ysi_profile)
+}
+
+final <- final %>%
+  select(Date, Depth_m, Temp_C, DO_mgL, pH)
 
 df.final<-data.frame()
 
@@ -324,17 +424,54 @@ for (i in 1:length(dates)){
   
 }
 
+final.grab <- ysi[0,]
+
+ysi_dates <- unique(ysi$Date)
+for (i in 1:length(ysi_dates)){
+  ysi_sample <- subset(ysi, ysi$Date == ysi_dates[i])
+  fp_hour <- subset(fp_sample, fp_sample$Date == ysi_dates[i])
+  ysi_profile <- ysi_sample[ysi_sample[, "Hour"] == closest(ysi_sample$Hour,fp_hour$Hour[1]),]
+  final.grab <- bind_rows(final.grab, ysi_profile)
+}
+
+final.grab <- final.grab %>%
+  select(Date, Depth_m, Temp_C)
+
+df.final.grab<-data.frame()
+
+for (i in 1:length(grab_dates)){
+  
+  profile <- final.grab %>%
+    filter(Date == grab_dates[i])
+  
+  ysi_layer<-profile %>% group_by(Date) %>% slice(which.min(abs(as.numeric(Depth_m) - grab_depths[i])))
+  
+  # Bind each of the data layers together.
+  df.final.grab = bind_rows(df.final.grab, ysi_layer)
+  
+}
+
+colnames(df.final.grab) <-c("Date","Grab_T_Depth_m","Grab_Depth_Temp_C")
+
+check <- left_join(df.final.grab,sample_info,by = "Date")
+
 colnames(ss_ysi)[1] <- "Date"
 colnames(td_ysi)[1] <- "Date"
+colnames(bf_ysi)[1] <- "Date"
+
 
 ysi_all <- left_join(df.final, ss_ysi, by = "Date")
-ysi_final <- left_join(ysi_all, td_ysi, by = "Date")
+ysi_all1 <- left_join(ysi_all, td_ysi, by = "Date")
+ysi_all2 <- left_join(ysi_all1, df.final.grab, by = "Date")
+ysi_final <- left_join(ysi_all2, bf_ysi, by = "Date")
+
 
 ysi_final <- ysi_final[-c(66:69, 71),]
 
 
 #read in SCC data and limit to temperature
-scc <- read_csv("./00_Data_files/SCC.csv") %>%
+scc <- fread("./00_Data_files/SCC.csv")
+scc <- tibble(scc) %>%
   select(DateTime:ThermistorTemp_C_9) %>%
   filter(date(DateTime) %in% sample_info$Date)
 
@@ -399,6 +536,18 @@ ggplot(data = td_scc1, aes(x = datetime, y = thermo.depth))+
   scale_y_reverse()+
   theme_classic()
 
+#calculate buoyancy frequency
+bf_scc <- ts.buoyancy.freq(wtr = wtr_scc, na.rm = TRUE, seasonal = TRUE) 
+
+bf_scc1 <- bf_scc %>%
+  mutate(Year = year(datetime))
+
+ggplot(data = bf_scc1, aes(x = datetime, y = n2))+
+  facet_wrap(vars(Year), scales = "free")+
+  geom_line(size = 1)+
+  scale_y_reverse()+
+  theme_classic()
+
 #find water temperature at depth of Cmax
 cmax <- read_csv("./00_Data_files/FP_DistributionMetrics.csv")
 
@@ -427,26 +576,48 @@ for (i in 1:length(dates)){
   
 }
 
+df.final.grab<-data.frame()
+
+
+for (i in 1:length(grab_dates)){
+  
+  profile <- scc_long %>%
+    filter(datetime == grab_dates[i])
+  
+  scc_layer<-profile %>% group_by(datetime) %>% slice(which.min(abs(as.numeric(Depth_m) - grab_depths[i])))
+  
+  # Bind each of the data layers together.
+  df.final.grab = bind_rows(df.final.grab, scc_layer)
+  
+}
+
+colnames(df.final.grab) <-c("Date","Grab_Depth_Temp_C","Grab_T_Depth_m")
+
+check <- left_join(df.final.grab,sample_info,by = "Date")
+
 colnames(df.final)[1] <- "Date"
 colnames(ss_scc)[1] <- "Date"
 colnames(td_scc)[1] <- "Date"
+colnames(bf_scc)[1] <- "Date"
+
 
 scc_all <- left_join(df.final, ss_scc, by = "Date")
-scc_final <- left_join(scc_all, td_scc, by = "Date")
+scc_all1 <- left_join(scc_all, td_scc, by = "Date")
+scc_all2 <- left_join(scc_all1, df.final.grab, by = "Date")
+scc_final <- left_join(scc_all2, bf_scc, by = "Date")
+
 
 Tmetrics <- data.frame(sample_info$Date)
 colnames(Tmetrics) <- "Date"
 
 Tmetrics1 <- left_join(Tmetrics, ctd_final, by = "Date")  
-colnames(Tmetrics1)[2:5] <- paste("CTD", colnames(Tmetrics1)[2:5], sep = "_")
+colnames(Tmetrics1)[2:10] <- paste("CTD", colnames(Tmetrics1)[2:10], sep = "_")
 Tmetrics2 <- left_join(Tmetrics1, ysi_final, by = "Date")
-colnames(Tmetrics2)[6:9] <- paste("YSI", colnames(Tmetrics2)[6:9], sep = "_")
+colnames(Tmetrics2)[11:19] <- paste("YSI", colnames(Tmetrics2)[11:19], sep = "_")
 Tmetrics3 <- left_join(Tmetrics2, scc_final, by = "Date")
-colnames(Tmetrics3)[10:13] <- paste("SCC", colnames(Tmetrics3)[10:13], sep = "_")
+colnames(Tmetrics3)[20:26] <- paste("SCC", colnames(Tmetrics3)[20:26], sep = "_")
 
-Tmetrics4 <- Tmetrics3[,c(1:9,11,10,12:13)]
+Tmetrics4 <- Tmetrics3
 
-write.csv(Tmetrics4, "./00_Data_files/WtrTemp_Stability.csv",row.names = FALSE)
-
-
+write.csv(Tmetrics4, "./00_Data_files/WtrTemp_Stability_DO_pH.csv",row.names = FALSE)
 

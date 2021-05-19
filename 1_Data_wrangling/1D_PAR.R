@@ -12,6 +12,13 @@
 pacman::p_load(tidyverse, lubridate, data.table)
 rm(list=ls())
 
+# #download data from EDI
+# data  <- "https://portal.edirepository.org/nis/dataviewer?packageid=edi.198.8&entityid=336d0a27c4ae396a75f4c07c01652985"
+# destination <- "./00_Data_files"
+# 
+# download.file(data,destfile = "./00_Data_files/Secchi.csv", method='libcurl')
+
+
 #read in sample dates and depths of phyto samples
 sample_info <- read_csv("./00_Data_files/EDI_phytos/phytoplankton.csv") %>%
   select(Date, Depth_m) %>%
@@ -100,7 +107,8 @@ final <- final[complete.cases(final),]
 check <- final %>%
   filter(Depth_m < 0)
 
-ctd_par <- final
+ctd_par <- final %>%
+  arrange(Date)
 
 #visualize PAR data, retrieve Kd and % light at Cmax and nutrient max
 #only calculating Kd for now because don't have incident light for most profiles
@@ -118,12 +126,20 @@ wts <- read_csv("./00_Data_files/WtrTemp_Stability.csv") %>%
                                ifelse((is.na(CTD_thermo.depth)),YSI_thermo.depth,CTD_thermo.depth))) %>%
   select(Year,Date, Temp_Depth_m,Temp_C,schmidt.stability,thermo.depth)
 
-##HUGE ISSUE: NO INCIDENT LIGHT DATA FOR CTD CASTS :-( :-(
+
 par_dates <- unique(ctd_par$Date)
 thermo_CTD_dates <- wts %>%
   filter(Date %in% par_dates)
 
-final <- matrix(NA, nrow = length(par_dates), ncol = 3)
+#read in cmax depths
+cmax <- read_csv("./00_Data_files/FP_DistributionMetrics.csv") %>%
+  select(Date, Peak_depth_m) %>%
+  filter(Date %in% par_dates)
+
+par_grabs <- sample_info %>%
+  filter(Date %in% par_dates)
+
+final <- matrix(NA, nrow = length(par_dates), ncol = 6)
 
 for (i in 1:length(par_dates)){
   par_profile <- subset(ctd_par, ctd_par$Date == par_dates[i])
@@ -141,16 +157,42 @@ for (i in 1:length(par_dates)){
     final[i,3] <- NA
   }
   
+  if(!is.na(cmax$Peak_depth_m[i])){
+    cmax.light.df <- par_profile[par_profile[, "Depth_m"] == closest(par_profile$Depth_m,cmax$Peak_depth_m[i]),]
+    cmax.light <- cmax.light.df$PAR_umolm2s/max(par_profile$PAR_umolm2s, na.rm = TRUE)*100
+    final[i,4] <- cmax.light
+  } else {
+    final[i,4] <- NA
+  }
+  
+  if(!is.na(par_grabs$Depth_m[i])){ 
+    cmax.light.df <- par_profile[par_profile[, "Depth_m"] == closest(par_profile$Depth_m,par_grabs$Depth_m[i]),]
+    #final[i,5] <- cmax.light.df$Depth_m
+    cmax.light <- cmax.light.df$PAR_umolm2s/max(par_profile$PAR_umolm2s, na.rm = TRUE)*100
+    final[i,5] <- cmax.light[1]
+  } else {
+    final[i,5] <- NA
+  }
+  
+  par_profile$perc_par <- par_profile$PAR_umolm2s/max(par_profile$PAR_umolm2s, na.rm = TRUE)*100
+  pz_depth.df <- par_profile[par_profile[, "perc_par"] == closest(par_profile$perc_par,1),]
+  pz_depth <- pz_depth.df$Depth_m
+  final[i,6] <- pz_depth
+  
   
 }
 
 final <- data.frame(final) %>%
   mutate(Date = as.Date(X1),CTD_Kd = as.double(X2),
-         CTD_perc_light_thermocline = as.double(X3)) %>%
-  select(Date, CTD_Kd, CTD_perc_light_thermocline)
+         CTD_perc_light_thermocline = as.double(X3),
+         CTD_perc_light_Cmax = as.double(X4),
+         CTD_pz_depth_m = as.double(X6),
+         CTD_perc_light_grab = as.double(X5)) %>%
+  select(Date, CTD_Kd, CTD_perc_light_thermocline, CTD_perc_light_Cmax,
+         CTD_pz_depth_m, CTD_perc_light_grab)
 ctd_kd <- final
 
-
+#check <- left_join(ctd_kd,sample_info,by = "Date")
 #read in YSI data and limit to PAR
 ysi <- read_csv("./00_Data_files/YSI.csv") %>%
   select(Reservoir, Site, DateTime, Depth_m, PAR_umolm2s) %>%
@@ -204,7 +246,15 @@ par_dates <- unique(ysi_par$Date)
 thermo_YSI_dates <- wts %>%
   filter(Date %in% par_dates)
 
-final <- matrix(NA, nrow = length(par_dates), ncol = 3)
+#read in cmax depths
+cmax <- read_csv("./00_Data_files/FP_DistributionMetrics.csv") %>%
+  select(Date, Peak_depth_m) %>%
+  filter(Date %in% par_dates)
+
+par_grabs <- sample_info %>%
+  filter(Date %in% par_dates)
+
+final <- matrix(NA, nrow = length(par_dates), ncol = 6)
 
 for (i in 1:length(par_dates)){
   par_profile <- subset(ysi_par, ysi_par$Date == par_dates[i])
@@ -222,26 +272,69 @@ for (i in 1:length(par_dates)){
     final[i,3] <- NA
   }
   
+  if(!is.na(cmax$Peak_depth_m[i])){
+    cmax.light.df <- par_profile[par_profile[, "Depth_m"] == closest(par_profile$Depth_m,cmax$Peak_depth_m[i]),]
+    cmax.light <- cmax.light.df$PAR_umolm2s/max(par_profile$PAR_umolm2s, na.rm = TRUE)*100
+    final[i,4] <- cmax.light
+  } else {
+    final[i,4] <- NA
+  }
+  
+  if(!is.na(par_grabs$Depth_m[i])){
+    cmax.light.df <- par_profile[par_profile[, "Depth_m"] == closest(par_profile$Depth_m,par_grabs$Depth_m[i]),]
+    cmax.light <- cmax.light.df$PAR_umolm2s/max(par_profile$PAR_umolm2s, na.rm = TRUE)*100
+    final[i,5] <- cmax.light
+  } else {
+    final[i,5] <- NA
+  }
+  
+  par_profile$perc_par <- par_profile$PAR_umolm2s/max(par_profile$PAR_umolm2s, na.rm = TRUE)*100
+  pz_depth.df <- par_profile[par_profile[, "perc_par"] == closest(par_profile$perc_par,1),]
+  pz_depth <- pz_depth.df$Depth_m[1]
+  final[i,6] <- pz_depth
+  
 }
 
 final <- data.frame(final) %>%
   mutate(Date = as.Date(X1),YSI_Kd = as.double(X2),
-         YSI_perc_light_thermocline = as.double(X3)) %>%
-  select(Date, YSI_Kd, YSI_perc_light_thermocline)
-ysi_kd <- final
+         YSI_perc_light_thermocline = as.double(X3),
+         YSI_perc_light_Cmax = as.double(X4),
+         YSI_pz_depth_m = as.double(X6),
+         YSI_perc_light_grab = as.double(X5)) %>%
+  select(Date, YSI_Kd, YSI_perc_light_thermocline,
+         YSI_perc_light_Cmax,YSI_pz_depth_m,YSI_perc_light_grab)
+ysi_kd <- final[-c(27,34),]
+
+#add Secchi as last resort
+secchi <- read_csv("./00_Data_files/Secchi.csv") %>%
+  filter(Reservoir == "FCR" & Site == 50 & date(DateTime) %in% sample_info$Date)%>%
+  mutate(Date = date(DateTime))
+
+secchi$Secchi_Kd = 1.7/secchi$Secchi_m
+secchi$Secchi_pz_depth_m = 2.8*secchi$Secchi_m
+
+secchi <- secchi %>%
+  select(Date, Secchi_Kd, Secchi_pz_depth_m)
+
+hist(secchi$Secchi_Kd)
+hist(secchi$Secchi_pz_depth_m)
+hist(ctd_kd$CTD_Kd)
+hist(ctd_kd$CTD_pz_depth_m)
+hist(ysi_kd$YSI_Kd)
+hist(ysi_kd$YSI_pz_depth_m)
+
 
 Kd <- data.frame(sample_info$Date)
 colnames(Kd) <- "Date"
 Kd1 <- left_join(Kd, ctd_kd, by = "Date")
 Kd2 <- left_join(Kd1, ysi_kd, by = "Date")
+Kd3 <- left_join(Kd2, secchi, by = "Date") 
+Kd3 <- Kd3[-c(30,31),]
 
-check <- Kd2 %>%
-  filter(is.na(CTD_Kd) & is.na(YSI_Kd))
+check <- Kd3 %>%
+  filter(is.na(CTD_Kd) & is.na(YSI_Kd) & is.na(Secchi_Kd))
 
-check <- Kd2 %>%
-  filter(YSI_Kd > 1.25)
-
-write.csv(Kd2, "./00_Data_files/Kd.csv",row.names = FALSE)
+write.csv(Kd3, "./00_Data_files/Kd.csv",row.names = FALSE)
 
 #visualization
 Kd <- read_csv("./00_Data_files/Kd.csv")
