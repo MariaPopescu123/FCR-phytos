@@ -1,0 +1,12 @@
+# Ignore everything in this directory
+*
+# Except this file
+!.gitignore
+!readme.txt
+!2A_EM_effect_analysis.R
+!2B_FP_ARIMA_analysis.R
+!2C_NMDS.R
+!2D_natural_storms.R
+!Table_S4.R
+!Table_S5.R
+!Table_S7.R

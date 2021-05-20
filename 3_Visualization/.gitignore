@@ -2,7 +2,12 @@
 *
 # Except this file
 !.gitignore
-!3A_ARIMA_results_exploration.R
-!3B_NMDS_corr_plots.R
-!FCR_locator_map.R
-!Network_correlation_plots.R
+!Fig3.R
+!Fig4.R
+!Fig5.R
+!Fig6.R
+!Fig7.R
+!FigS4.R
+!FigS6.R
+!FigS7.R
+!exploratory_visualization/

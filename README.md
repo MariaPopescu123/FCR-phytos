@@ -1,9 +1,7 @@
 # FCR-phytos
 
-A study examining controls on phytoplankton community spatial distribution and composition over time.
+A study examining the effects of thermocline deepening on phytoplankton community spatial distribution and composition over time.
 
-Driving questions:
+Code repository associated with Lofton et al., 20XX
 
-1. What are the primary environmental drivers of community spatial (depth) distribution over time, and how do they affect spatial distribution?
-
-2. What is the relationship between spatial distribution and community structure over time?
+Experimental thermocline deepening alters vertical distribution and community structure of phytoplankton in a four-year whole-reservoir manipulation
