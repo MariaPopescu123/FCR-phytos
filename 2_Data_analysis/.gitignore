@@ -4,7 +4,7 @@
 !.gitignore
 !readme.txt
 !2A_EM_effect_analysis.R
-!2B_FP_ARIMA_analysis.R
+!2B_FP_ARIMA_analyses.R
 !2C_NMDS.R
 !2D_natural_storms.R
 !Table_S4.R

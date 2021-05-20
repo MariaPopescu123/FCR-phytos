@@ -1,13 +1,13 @@
 # Ignore everything in this directory
-*
+/*
 # Except this file
-!.gitignore
-!Fig3.R
-!Fig4.R
-!Fig5.R
-!Fig6.R
-!Fig7.R
-!FigS4.R
-!FigS6.R
-!FigS7.R
+!/.gitignore
+!/Fig3.R
+!/Fig4.R
+!/Fig5.R
+!/Fig6.R
+!/Fig7.R
+!/FigS4.R
+!/FigS6.R
+!/FigS7.R
 !/exploratory_visualization/
