@@ -43,7 +43,7 @@ env$Month <- month(my.cs.data$Date)
 env <- data.frame(scale(env, center = TRUE, scale = TRUE)) 
 
 #read in community data
-phytos <- read_csv("./00_Data_files/EDI_phytos/phytoplankton.csv") %>%
+phytos <- read_csv("./0_Data_files/phytoplankton.csv") %>%
   select(Date, Genus, BV_um3mL) %>%
   spread(key = Genus, value = BV_um3mL)
 
@@ -109,7 +109,7 @@ eu.sel <- subset(Y.sel, row.names(Y.sel) %in% eugleno)
 ra.sel <- subset(Y.sel, row.names(Y.sel) %in% raphid)
 
 #make plot
-tiff(filename = "./3_Visualization/Fig5.tif",width = 5,height = 7.5,units = "in",res = 300)
+tiff(filename = "./3_Visualization/Fig5.tif",width = 6.5,height = 9.75,units = "in",res = 300)
 par(mfrow = c(3,2),mar = c(3,3,1.5,0),mgp = c(1.5,0.5,0))
 
 plot(Q, display=c('sites','species'),choices=c(1,2), type='n')

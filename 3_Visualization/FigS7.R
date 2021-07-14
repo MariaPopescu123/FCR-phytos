@@ -8,8 +8,11 @@ rm(list=ls())
 
 
 #get data
-mydata <- read_csv( "./00_Data_files/WRT.csv") %>%
+mydata <- read_csv( "./0_Data_files/WRT.csv") %>%
   mutate(Year = year(Date))
+
+median(mydata$WRT_day, na.rm = TRUE)
+sd(mydata$WRT_day, na.rm = TRUE)
 
 
 gg_color_hue <- function(n) {

@@ -21,7 +21,7 @@
 pacman::p_load(tidyverse, lubridate, lemon, grid, gridExtra, cowplot)
 rm(list=ls())
 
-phytos <- read_csv("./00_Data_files/EDI_phytos/phytoplankton.csv") 
+phytos <- read_csv("./0_Data_files/phytoplankton.csv") 
 
 #calculate total BV for each sample day
 total_bv <- phytos %>%
@@ -227,7 +227,7 @@ p3 <- ggplot(data = first2, aes(x = Date, y = log(BV_TOTAL))) +
   geom_line() +
   geom_point(size = 2)+
   facet_rep_wrap(vars(Year), scales = "free_x", labeller = labeller(Year = year_labels))+
-  ylab(expression(paste("natural log(",mu,m^3,~mL^-1,")")))+
+  ylab(expression(paste("log biovolume (",mu,m^3,~mL^-1,")")))+
   xlab("")+
   scale_x_date(expand = c(0,0))+
   coord_cartesian(ylim = c(11,16.5))+
@@ -250,7 +250,7 @@ p4 <- ggplot(data = second2, aes(x = Date, y = log(BV_TOTAL))) +
   geom_line() +
   geom_point(size = 2)+
   facet_rep_wrap(vars(Year), scales = "free_x", labeller = labeller(Year = year_labels))+
-  ylab(expression(paste("natural log(",mu,m^3,~mL^-1,")")))+
+  ylab(expression(paste("log biovolume (",mu,m^3,~mL^-1,")")))+
   xlab("")+
   scale_x_date(expand = c(0,0))+
   coord_cartesian(ylim = c(11,16.5))+

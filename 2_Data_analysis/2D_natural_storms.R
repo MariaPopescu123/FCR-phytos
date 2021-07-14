@@ -5,7 +5,7 @@
 pacman::p_load(tidyverse, lubridate, cowplot, grid, data.table)
 rm(list=ls())
 
-met <- fread("./00_Data_files/Met_final_2015_2020.csv", fill = TRUE, blank.lines.skip = FALSE,select = c("DateTime",
+met <- fread("./0_Data_files/Met_final_2015_2020.csv", fill = TRUE, blank.lines.skip = FALSE,select = c("DateTime",
                                                                                                          "Rain_Total_mm",                                                        
                                                                                                          "WindSpeed_Average_m_s",
                                                                                                          "Flag_Rain_Total_mm",

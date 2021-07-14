@@ -56,7 +56,7 @@ p2 <- ggplot(data = distdates, aes(x = MonthDay, y = schmidt.stability, group = 
   xlab("Date (mm-dd)")+
   theme_classic()+
   theme(legend.position = "none",plot.title = element_text(face = "bold"))+
-  ggtitle("B")
+  ggtitle("C")
 p2
 
 p3 <- ggplot(data = distdates, aes(x = MonthDay, y = n2, group = Year, color = Year))+
@@ -69,7 +69,7 @@ p3 <- ggplot(data = distdates, aes(x = MonthDay, y = n2, group = Year, color = Y
   xlab("Date (mm-dd)")+
   theme_classic()+
   theme(legend.position = "none",plot.title = element_text(face = "bold"))+
-  ggtitle("C")
+  ggtitle("E")
 p3
 
 p4 <- ggplot(data = distdates, aes(x = MonthDay, y = SRPmax_depth_m, group = Year, color = Year))+
@@ -82,7 +82,7 @@ p4 <- ggplot(data = distdates, aes(x = MonthDay, y = SRPmax_depth_m, group = Yea
   theme_classic()+
   theme(legend.position = "none",plot.title = element_text(face = "bold"))+
   scale_y_reverse()+
-  ggtitle("D")
+  ggtitle("G")
 p4
 
 p5 <- ggplot(data = distdates, aes(x = MonthDay, y = Peak_depth_m, group = Year, color = Year))+
@@ -95,7 +95,7 @@ p5 <- ggplot(data = distdates, aes(x = MonthDay, y = Peak_depth_m, group = Year,
   theme_classic()+
   theme(legend.position = "none",plot.title = element_text(face = "bold"))+
   scale_y_reverse()+
-  ggtitle("E")
+  ggtitle("I")
 p5
 
 boxplot_dates <- distdates %>%
@@ -130,7 +130,7 @@ p6 <- ggplot(data = boxplot_dates, aes(x = Year, y = thermo.depth, group = Year,
   theme(legend.position = "none",plot.title = element_text(face = "bold"))+
   #geom_text(data = boxplot_dates, aes(y = td_y-0.1, x = Year,label = td_groups), size = 4)+
   scale_y_reverse()+
-  ggtitle("F")
+  ggtitle("B")
 p6
 
 p7 <- ggplot(data = boxplot_dates, aes(x = Year, y = schmidt.stability, group = Year, fill = Year))+
@@ -141,7 +141,7 @@ p7 <- ggplot(data = boxplot_dates, aes(x = Year, y = schmidt.stability, group = 
   theme_classic()+
   #geom_text(data = boxplot_dates, aes(y = ss_y+2, x = Year,label = ss_groups), size = 4)+
   theme(legend.position = "none",plot.title = element_text(face = "bold"))+
-  ggtitle("G")
+  ggtitle("D")
 p7
 
 p8 <- ggplot(data = boxplot_dates, aes(x = Year, y = n2, group = Year, fill = Year))+
@@ -153,7 +153,7 @@ p8 <- ggplot(data = boxplot_dates, aes(x = Year, y = n2, group = Year, fill = Ye
   scale_y_continuous(breaks = c(0.002,0.004,0.006,0.008,0.010,0.012,0.014))+
   #geom_text(data = boxplot_dates, aes(y = ss_y+2, x = Year,label = ss_groups), size = 4)+
   theme(legend.position = "none",plot.title = element_text(face = "bold"))+
-  ggtitle("H")
+  ggtitle("F")
 p8
 
 p9 <- ggplot(data = boxplot_dates, aes(x = Year, y = SRPmax_depth_m, group = Year, fill = Year))+
@@ -165,7 +165,7 @@ p9 <- ggplot(data = boxplot_dates, aes(x = Year, y = SRPmax_depth_m, group = Yea
   scale_y_reverse()+
   #geom_text(data = boxplot_dates, aes(y = dSRP_y-0.3, x = Year,label = dSRP_groups), size = 4)+
   theme(legend.position = "none",plot.title = element_text(face = "bold"))+
-  ggtitle("I")
+  ggtitle("H")
 p9
 
 p10 <- ggplot(data = boxplot_dates, aes(x = Year, y = Peak_depth_m, group = Year, fill = Year))+
@@ -191,7 +191,8 @@ pleg_box <- ggplot(data = boxplot_dates, aes(x = Year, y = Peak_depth_m, group =
         legend.key.height = unit(1, 'cm'), #change legend key height
         legend.key.width = unit(1, 'cm'), #change legend key width
         legend.title = element_blank(), #change legend title font size
-        legend.text = element_text(size=16)) #change legend text font size  ggtitle("N")
+        legend.text = element_text(size=16),
+        legend.position="bottom")
 pleg_box
 
 boxplot_legend <- cowplot::get_legend(pleg_box)
@@ -211,7 +212,8 @@ pleg_line <- ggplot(data = distdates, aes(x = MonthDay, y = Peak_depth_m, group 
         legend.key.height = unit(1, 'cm'), #change legend key height
         legend.key.width = unit(1, 'cm'), #change legend key width
         legend.title = element_blank(), #change legend title font size
-        legend.text = element_text(size=16)) #change legend text font size   ggtitle("G")
+        legend.text = element_text(size=16),#change legend text font size   ggtitle("G")
+        legend.position="bottom")
 pleg_line
 
 line_legend <- cowplot::get_legend(pleg_line)
@@ -220,7 +222,9 @@ grid.newpage()
 grid.draw(line_legend)
 
 
-fig3 <- plot_grid(p1,p2,p3,p4,p5,line_legend,p6,p7,p8,p9,p10,boxplot_legend,nrow = 4, ncol = 3, align = "hv")
-ggsave(fig3, filename = "./3_Visualization/Fig3_v2.tif",height = 10, width = 10,
+fig3 <- plot_grid(p1,p6,p2,p7,p3,p8,p4,p9,p5,p10,line_legend,boxplot_legend,nrow = 6, ncol = 2, align = "hv",
+                  rel_heights = c(4,4,4,4,4,1))
+fig3
+ggsave(fig3, filename = "./3_Visualization/Fig3_v2.tif",height = 12, width = 8.5,
        units = "in", dpi = 300, dev = "tiff")
 
