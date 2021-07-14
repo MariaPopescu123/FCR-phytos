@@ -1,4 +1,4 @@
-#Title: NMDS for FCR phytos
+#FigS6
 #Author: Mary Lofton
 #Date: 11DEC2017
 #Updated: 01FEB2021

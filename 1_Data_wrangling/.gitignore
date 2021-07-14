@@ -1,4 +1,3 @@
-# Ignore everything in this directory
-
-# Except this file
-1L_Turbulence.R
+# Ignore these files
+1M_Turbulence.R
+1L_Secchi.R
