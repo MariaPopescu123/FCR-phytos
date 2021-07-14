@@ -42,7 +42,7 @@ my.fp.data <- read_csv("./2_Data_analysis/FP_megamatrix.csv")%>%
 
 
 #read in community data
-phytos <- read_csv("./00_Data_files/EDI_phytos/phytoplankton.csv") %>%
+phytos <- read_csv("./0_Data_files/phytoplankton.csv") %>%
   select(Date, Genus, BV_um3mL) %>%
   spread(key = Genus, value = BV_um3mL)
 
@@ -66,10 +66,6 @@ phytos2 <- phytos1 %>%
 phytos3 <- as.matrix(phytos2)
 
 ####RUN THE NMDS FOR ALL YEARS####
-
-# #calculate Hellinger distance - FOR COMMUNITY DATA
-# WHY WOULD I DO THIS??
-# hellinger_vars <- decostand(phytos[,-c(1:3)], method = "hellinger")
 
 ##scree plot
 stress <- rep(NA,6)
@@ -126,69 +122,6 @@ final <- data.frame(final)
 colnames(final) <- c("MonthYear_A","MonthYear_B","R","p")
 final.m.y <- final
 final.m.y$diff = ifelse(final.m.y$p < 0.05, "yes","no")
-
-
-#calculate Euclidean distance among points within years
-#2016
-eudist <- as.matrix(vegdist(Q$points[1:20,], method = "euclidean", binary = FALSE, diag = TRUE, upper = TRUE))
-finaldist <- NULL
-for (i in 1:19){
-  finaldist[1] <- 0
-  finaldist[i+1]<- eudist[i,i+1]+finaldist[i]
-}
-
-
-#2017
-eudist <- as.matrix(vegdist(Q$points[21:35,], method = "euclidean", binary = FALSE, diag = TRUE, upper = TRUE))
-for (i in 1:14){
-  finaldist[21] <- 0
-  finaldist[i+21]<- eudist[i,i+1]+finaldist[i+20]
-}
-
-#2018
-eudist <- as.matrix(vegdist(Q$points[36:50,], method = "euclidean", binary = FALSE, diag = TRUE, upper = TRUE))
-for (i in 1:14){
-  finaldist[36] <- 0
-  finaldist[i+36]<- eudist[i,i+1]+finaldist[i+35]
-}
-
-#2019
-eudist <- as.matrix(vegdist(Q$points[51:67,], method = "euclidean", binary = FALSE, diag = TRUE, upper = TRUE))
-for (i in 1:16){
-  finaldist[51] <- 0
-  finaldist[i+51]<- eudist[i,i+1]+finaldist[i+50]
-}
-finaldist
-
-#join back to dataframe
-my.cols <- gg_color_hue(4)
-distdates <- phytos1 %>%
-  select(Year, Date) %>%
-  mutate(MonthDay = format(Date, format="%m-%d"))
-distdates$Euclid_dist <- finaldist
-ggplot(data = distdates, aes(x = MonthDay, y = Euclid_dist, group = as.factor(Year), color = as.factor(Year)))+
-  geom_line(size = 1.5)+
-  geom_point(size = 3)+
-  theme_classic()+
-  geom_vline(xintercept = "05-29", lty = 1, col = my.cols[1])+
-  geom_vline(xintercept = "05-30", lty = 1, col = my.cols[2])+
-  geom_vline(xintercept = "06-27", lty = 1, col = my.cols[1])+
-  geom_vline(xintercept = "07-10", lty = 1, col = my.cols[2])+
-  geom_vline(xintercept = "07-11", lty = 1, col = my.cols[2])+
-  geom_vline(xintercept = "07-12", lty = 1, col = my.cols[2])+
-  geom_vline(xintercept = "07-25", lty = 1, col = my.cols[1])+
-  geom_vline(xintercept = "07-26", lty = 1, col = my.cols[1])+
-  geom_vline(xintercept = "07-27", lty = 1, col = my.cols[1])
-  # geom_hline(yintercept = mean(distdates$Euclid_dist[1:20],na.rm = TRUE), lty = 2, col = my.cols[1])+
-  # geom_hline(yintercept = mean(distdates$Euclid_dist[21:35],na.rm = TRUE), lty = 2, col = my.cols[2])+
-  # geom_hline(yintercept = mean(distdates$Euclid_dist[36:50],na.rm = TRUE), lty = 2, col = my.cols[3])+
-  # geom_hline(yintercept = mean(distdates$Euclid_dist[51:67],na.rm = TRUE), lty = 2, col = my.cols[4])
-
-ggplot(data = distdates, aes(x = as.factor(Year), y = Euclid_dist, fill = as.factor(Year)))+
-  geom_boxplot()+
-  theme_classic()
-my.aov <- aov(Euclid_dist ~ as.factor(Year), data = distdates)
-summary(my.aov)
 
 #run ANOSIM
 ano_EM1 = anosim(phytos3, phytos1$EM1, distance = "bray", permutations = 9999)
@@ -509,132 +442,6 @@ en13
 en_all = envfit(Q, env_all, permutations = 9999, na.rm = TRUE, choices = c(1:2))
 
 
-#plot results with EM periods and relationships w/ environmental variables
-ordirgl(Q, display = "sites", envfit = en_all)
-plot(Q, type = "n",choices = c(1,3))
-points(Q, display = "sites", cex = 1, pch = 16, col = "red",choices = c(1,3))
-text(Q, display = "species", cex = 0.5, col = "blue",choices = c(1,3))
-ordisurf(Q, env$Peak_depth_m, add = TRUE,choices = c(1,3))
-ordisurf(Q,env$EM2, choices = c(1,2), display = "species")
-ordisurf(Q,env$thermo.depth, choices = c(1,3), display = "species")
-ordisurf(Q,env$Peak_depth_m, choices = c(1,3), display = "species")
-
-
-#first and second axes by EM2
-png(filename = "./3_Visualization/NMDS_all_1_2_EM2.png",width = 9,height = 9,units = "in",res = 300)
-plot(Q, display=c('sites','species'),choices=c(1,2), type='n')
-points(Q$points[phytos1$EM2==1,1], Q$points[phytos1$EM2==1,2], pch=21,bg="black", cex = 2)
-points(Q$points[phytos1$EM2==0,1], Q$points[phytos1$EM2==0,2], pch=21,bg="white", cex = 2)
-plot(en12)
-legend("topright",legend = c("EM years","years w/ no EM"), pch = 21, pt.bg = c("black","white"), bty = "n", pt.cex = 2)
-legend("bottomright",legend = c("k = 0.11"),bty = "n")
-dev.off()
-
-#first and second axes by year
-my.cols <- gg_color_hue(4)
-png(filename = "./3_Visualization/NMDS_all_1_2_year.png",width = 9,height = 9,units = "in",res = 300)
-plot(Q, display=c('sites','species'),choices=c(1,2), type='n')
-points(Q$points[phytos1$Year==2016,1], Q$points[phytos1$Year==2016,2], pch=21,bg=my.cols[1], cex = 2)
-points(Q$points[phytos1$Year==2017,1], Q$points[phytos1$Year==2017,2], pch=21,bg=my.cols[2], cex = 2)
-points(Q$points[phytos1$Year==2018,1], Q$points[phytos1$Year==2018,2], pch=21,bg=my.cols[3], cex = 2)
-points(Q$points[phytos1$Year==2019,1], Q$points[phytos1$Year==2019,2], pch=21,bg=my.cols[4], cex = 2)
-plot(en12)
-legend("topright",legend = c("2016","2017","2018","2019"), pch = 21, pt.bg = my.cols, bty = "n", pt.cex = 2)
-legend("bottomright",legend = c("k = 0.11"),bty = "n")
-dev.off()
-
-#first and second axes by peak depth
-png(filename = "./3_Visualization/NMDS_all_1_2_peak_depth.png",width = 9,height = 9,units = "in",res = 300)
-plot(Q, display=c('sites','species'),choices=c(1,2), type='n')
-points(Q$points[fp$Peak_depth_indic==1,1], Q$points[fp$Peak_depth_indic==1,2], pch=21,bg=my.cols[1], cex = 2)
-points(Q$points[fp$Peak_depth_indic==2,1], Q$points[fp$Peak_depth_indic==2,2], pch=21,bg=my.cols[2], cex = 2)
-points(Q$points[fp$Peak_depth_indic==3,1], Q$points[fp$Peak_depth_indic==3,2], pch=21,bg=my.cols[3], cex = 2)
-plot(en12)
-legend("bottomleft",legend = c("peak depth < 3 m","peak depth = 3-6 m","peak depth > 6 m"), pch = 21, pt.bg = my.cols, bty = "n", pt.cex = 2)
-legend("topleft",legend = c("k = 0.11"),bty = "n")
-dev.off()
-
-#first and second axes by month
-my.cols <- gg_color_hue(5)
-png(filename = "./3_Visualization/NMDS_all_1_2_month.png",width = 9,height = 9,units = "in",res = 300)
-plot(Q, display=c('sites','species'),choices=c(1,2), type='n')
-points(Q$points[phytos1$Month==5,1], Q$points[phytos1$Month==5,2], pch=21,bg=my.cols[1], cex = 2)
-points(Q$points[phytos1$Month==6,1], Q$points[phytos1$Month==6,2], pch=21,bg=my.cols[2], cex = 2)
-points(Q$points[phytos1$Month==7,1], Q$points[phytos1$Month==7,2], pch=21,bg=my.cols[3], cex = 2)
-points(Q$points[phytos1$Month==8,1], Q$points[phytos1$Month==8,2], pch=21,bg=my.cols[4], cex = 2)
-points(Q$points[phytos1$Month==9,1], Q$points[phytos1$Month==9,2], pch=21,bg=my.cols[5], cex = 2)
-plot(en12)
-legend("topleft", legend=c('May','June', 'July','Aug','Sept'), pch=21, pt.bg=c(my.cols),bty = "n", pt.cex = 2) 
-legend("bottomright",legend = c("k = 0.11"),bty = "n")
-dev.off()
-
-
-#first and third axes by EM2
-png(filename = "./3_Visualization/NMDS_all_1_3_EM2.png",width = 9,height = 9,units = "in",res = 300)
-plot(Q, display=c('sites','species'),choices=c(1,3), type='n')
-points(Q$points[phytos1$EM2==1,1], Q$points[phytos1$EM2==1,3], pch=21,bg="black", cex = 2)
-points(Q$points[phytos1$EM2==0,1], Q$points[phytos1$EM2==0,3], pch=21,bg="white", cex = 2)
-plot(en13)
-legend("topright",legend = c("EM years","years w/ no EM"), pch = 21, pt.bg = c("black","white"), bty = "n", pt.cex = 2)
-legend("bottomright",legend = c("k = 0.11"),bty = "n")
-dev.off()
-
-#first and third axes by year
-my.cols <- gg_color_hue(4)
-png(filename = "./3_Visualization/NMDS_all_1_3_year.png",width = 9,height = 9,units = "in",res = 300)
-plot(Q, display=c('sites','species'),choices=c(1,3), type='n')
-points(Q$points[phytos1$Year==2016,1], Q$points[phytos1$Year==2016,3], pch=21,bg=my.cols[1], cex = 2)
-points(Q$points[phytos1$Year==2017,1], Q$points[phytos1$Year==2017,3], pch=21,bg=my.cols[2], cex = 2)
-points(Q$points[phytos1$Year==2018,1], Q$points[phytos1$Year==2018,3], pch=21,bg=my.cols[3], cex = 2)
-points(Q$points[phytos1$Year==2019,1], Q$points[phytos1$Year==2019,3], pch=21,bg=my.cols[4], cex = 2)
-plot(en13)
-legend("topright",legend = c("2016","2017","2018","2019"), pch = 21, pt.bg = my.cols, bty = "n", pt.cex = 2)
-legend("bottomright",legend = c("k = 0.11"),bty = "n")
-dev.off()
-
-#first and third axes by peak depth
-png(filename = "./3_Visualization/NMDS_all_1_3_peak_depth.png",width = 9,height = 9,units = "in",res = 300)
-plot(Q, display=c('sites','species'),choices=c(1,3), type='n')
-points(Q$points[fp$Peak_depth_indic==1,1], Q$points[fp$Peak_depth_indic==1,3], pch=21,bg=my.cols[1], cex = 2)
-points(Q$points[fp$Peak_depth_indic==2,1], Q$points[fp$Peak_depth_indic==2,3], pch=21,bg=my.cols[2], cex = 2)
-points(Q$points[fp$Peak_depth_indic==3,1], Q$points[fp$Peak_depth_indic==3,3], pch=21,bg=my.cols[3], cex = 2)
-plot(en12)
-legend("bottomleft",legend = c("peak depth < 3 m","peak depth = 3-6 m","peak depth > 6 m"), pch = 21, pt.bg = my.cols, bty = "n", pt.cex = 2)
-legend("topleft",legend = c("k = 0.11"),bty = "n")
-dev.off()
-
-#first and third axes by month
-png(filename = "./3_Visualization/NMDS_all_1_3_month.png",width = 9,height = 9,units = "in",res = 300)
-plot(Q, display=c('sites','species'),choices=c(1,3), type='n')
-points(Q$points[phytos1$Month==5,1], Q$points[phytos1$Month==5,3], pch=21,bg=my.cols[1], cex = 2)
-points(Q$points[phytos1$Month==6,1], Q$points[phytos1$Month==6,3], pch=21,bg=my.cols[2], cex = 2)
-points(Q$points[phytos1$Month==7,1], Q$points[phytos1$Month==7,3], pch=21,bg=my.cols[3], cex = 2)
-points(Q$points[phytos1$Month==8,1], Q$points[phytos1$Month==8,3], pch=21,bg=my.cols[4], cex = 2)
-points(Q$points[phytos1$Month==9,1], Q$points[phytos1$Month==9,3], pch=21,bg=my.cols[5], cex = 2)
-plot(en13)
-legend("topleft", legend=c('May','June', 'July','Aug','Sept'), pch=21, pt.bg=c(my.cols),bty = "n", pt.cex = 2) 
-legend("bottomright",legend = c("k = 0.11"),bty = "n")
-dev.off()
-
-#plot w/ genera overlain - this is just for preliminary interpretation, 
-#these will be difficult to read
-png(filename = "./3_Visualization/NMDS_all_1_2_genera.png",width = 9,height = 9,units = "in",res = 300)
-fig <- ordiplot(Q, choices = c(1,2))
-points(Q$points[phytos1$EM1==1,1], Q$points[phytos1$EM1==1,2], pch=21,bg='black')
-text(fig, "species", col="blue", cex=0.6)
-plot(en12, col = "red")
-legend("topright",legend = c("EM + 2 wks post","no EM"), pch = 21, pt.bg = c("black","white"), bty = "n")
-dev.off()
-
-png(filename = "./3_Visualization/NMDS_all_1_3_genera.png",width = 9,height = 9,units = "in",res = 300)
-fig <- ordiplot(Q, choices = c(1,3))
-points(Q$points[phytos1$EM1==1,1], Q$points[phytos1$EM1==1,3], pch=21,bg='black')
-text(fig, "species", col="blue", cex=0.6)
-plot(en13, col = "red")
-legend("topright",legend = c("EM + 2 wks post","no EM"), pch = 21, pt.bg = c("black","white"), bty = "n")
-dev.off()
-
-
 #### NMDS FOR 2016 ONLY ####
 
 #select 2016 data
@@ -872,43 +679,6 @@ env_2016 <- env2016 %>%
 en = envfit(Q, env_2016, permutations = 999, na.rm = TRUE)
 en
 
-#plot results
-my.cols <- gg_color_hue(4)
-png(filename = "./3_Visualization/NMDS_2016_1_2_EM3.png",width = 9,height = 9,units = "in",res = 300)
-plot(Q, display=c('sites','species'),choices=c(1,2), type='n')
-points(Q$points[p2016.data$EM3==0,1], Q$points[p2016.data$EM3==0,2], pch=21,bg=my.cols[1], cex = 2)
-points(Q$points[p2016.data$EM3==1,1], Q$points[p2016.data$EM3==1,2], pch=21,bg=my.cols[2], cex = 2)
-points(Q$points[p2016.data$EM3==2,1], Q$points[p2016.data$EM3==2,2], pch=21,bg=my.cols[3], cex = 2)
-points(Q$points[p2016.data$EM3==3,1], Q$points[p2016.data$EM3==3,2], pch=21,bg=my.cols[4], cex = 2)
-plot(en)
-legend("topright",legend = c("pre-mix","post-mix 1","post-mix 2",
-                             "post-mix 3"), pch = 21, pt.bg = my.cols, bty = "n", pt.cex = 2)
-legend("bottomright",legend = c("k = 0.13"),bty = "n")
-dev.off()
-
-#coded by month
-my.cols <- gg_color_hue(5)
-png(filename = "./3_Visualization/NMDS_2016_1_2_month.png",width = 9,height = 9,units = "in",res = 300)
-plot(Q, display=c('sites','species'),choices=c(1,2), type='n')
-points(Q$points[p2016.data$Month==5,1], Q$points[p2016.data$Month==5,2], pch=21,bg=my.cols[1], cex = 2)
-points(Q$points[p2016.data$Month==6,1], Q$points[p2016.data$Month==6,2], pch=21,bg=my.cols[2], cex = 2)
-points(Q$points[p2016.data$Month==7,1], Q$points[p2016.data$Month==7,2], pch=21,bg=my.cols[3], cex = 2)
-points(Q$points[p2016.data$Month==8,1], Q$points[p2016.data$Month==8,2], pch=21,bg=my.cols[4], cex = 2)
-points(Q$points[p2016.data$Month==9,1], Q$points[p2016.data$Month==9,2], pch=21,bg=my.cols[5], cex = 2)
-plot(en)
-legend("topright", legend=c('May','June', 'July','Aug','Sept'), pch=21, pt.bg=c(my.cols),bty = "n", pt.cex = 2) 
-legend("bottomright",legend = c("k = 0.13"),bty = "n")
-dev.off()
-
-#plot w/ genera overlain - this is just for preliminary interpretation, 
-#these will be difficult to read
-png(filename = "./3_Visualization/NMDS_2016_1_2_genera.png",width = 9,height = 9,units = "in",res = 300)
-fig <- ordiplot(Q, choices = c(1,2))
-points(Q$points[p2016.data$EM1==1,1], Q$points[p2016.data$EM1==1,2], pch=21,bg='black')
-text(fig, "species", col="blue", cex=0.6)
-legend("topright",legend = c("EM + 2 wks post","no EM"), pch = 21, pt.bg = c("black","white"), bty = "n")
-dev.off()
-
 
 #### 2017 ####
 
@@ -1075,28 +845,6 @@ env_2017 <- env2017 %>%
 en = envfit(Q, env_2017, permutations = 999, na.rm = TRUE)
 en
 
-#coded by month
-my.cols <- gg_color_hue(5)
-png(filename = "./3_Visualization/NMDS_2017_1_2_month.png",width = 9,height = 9,units = "in",res = 300)
-plot(Q, display=c('sites','species'),choices=c(1,2), type='n')
-points(Q$points[p2017.data$Month==5,1], Q$points[p2017.data$Month==5,2], pch=21,bg=my.cols[1], cex = 2)
-points(Q$points[p2017.data$Month==6,1], Q$points[p2017.data$Month==6,2], pch=21,bg=my.cols[2], cex = 2)
-points(Q$points[p2017.data$Month==7,1], Q$points[p2017.data$Month==7,2], pch=21,bg=my.cols[3], cex = 2)
-points(Q$points[p2017.data$Month==8,1], Q$points[p2017.data$Month==8,2], pch=21,bg=my.cols[4], cex = 2)
-points(Q$points[p2017.data$Month==9,1], Q$points[p2017.data$Month==9,2], pch=21,bg=my.cols[5], cex = 2)
-plot(en)
-legend("topright", legend=c('May','June', 'July','Aug','Sept'), pch=21, pt.bg=c(my.cols),bty = "n", pt.cex = 2) 
-legend("bottomright",legend = c("k = 0.08"),bty = "n")
-dev.off()
-
-#plot w/ genera overlain - this is just for preliminary interpretation, 
-#these will be difficult to read
-png(filename = "./3_Visualization/NMDS_2017_1_2_genera.png",width = 9,height = 9,units = "in",res = 300)
-fig <- ordiplot(Q, choices = c(1,2))
-points(Q$points[p2017.data$EM1==1,1], Q$points[p2017.data$EM1==1,2], pch=21,bg='black')
-text(fig, "species", col="blue", cex=0.6)
-legend("topright",legend = c("EM + 2 wks post","no EM"), pch = 21, pt.bg = c("black","white"), bty = "n")
-dev.off()
 
 
 #### 2018 ####
@@ -1247,28 +995,6 @@ env_2018 <- env2018 %>%
 #run final correlations w/ significant environmental variables
 en = envfit(Q, env_2018, permutations = 9999, na.rm = TRUE)
 en
-
-my.cols <- gg_color_hue(5)
-#plot results by month
-png(filename = "./3_Visualization/NMDS_2018_1_2_month.png",width = 9,height = 9,units = "in",res = 300)
-plot(Q, display=c('sites','species'),choices=c(1,2), type='n')
-points(Q$points[p2018.data$Month==5,1], Q$points[p2018.data$Month==5,2], pch=21,bg=my.cols[1], cex = 2)
-points(Q$points[p2018.data$Month==6,1], Q$points[p2018.data$Month==6,2], pch=21,bg=my.cols[2], cex = 2)
-points(Q$points[p2018.data$Month==7,1], Q$points[p2018.data$Month==7,2], pch=21,bg=my.cols[3], cex = 2)
-points(Q$points[p2018.data$Month==8,1], Q$points[p2018.data$Month==8,2], pch=21,bg=my.cols[4], cex = 2)
-points(Q$points[p2018.data$Month==9,1], Q$points[p2018.data$Month==9,2], pch=21,bg=my.cols[5], cex = 2)
-plot(en)
-legend("topright", legend=c('May','June', 'July','Aug','Sept'), pch=21, pt.bg=c(my.cols),bty = "n", pt.cex = 2) 
-legend("bottomright",legend = c("k = 0.12"),bty = "n")
-dev.off()
-
-#plot w/ genera overlain - this is just for preliminary interpretation, 
-#these will be difficult to read
-png(filename = "./3_Visualization/NMDS_2018_1_2_genera.png",width = 9,height = 9,units = "in",res = 300)
-fig <- ordiplot(Q, choices = c(1,2))
-text(fig, "species", col="blue", cex=0.6)
-legend("bottomright",legend = c("k = 0.12"),bty = "n")
-dev.off()
 
 
 #### 2019 ####
@@ -1450,40 +1176,4 @@ env_2019 <- env2019 %>%
 #run final correlations w/ significant environmental variables
 en = envfit(Q, env_2019, permutations = 9999, na.rm = TRUE)
 en
-
-#no EM plot because there was no EM in 2019
-
-#plot results
-my.cols <- gg_color_hue(5)
-png(filename = "./3_Visualization/NMDS_2019_1_2_month.png",width = 9,height = 9,units = "in",res = 300)
-plot(Q, display=c('sites','species'),choices=c(1,2), type='n')
-points(Q$points[p2019.data$Month==5,1], Q$points[p2019.data$Month==5,2], pch=21,bg=my.cols[1], cex = 2)
-points(Q$points[p2019.data$Month==6,1], Q$points[p2019.data$Month==6,2], pch=21,bg=my.cols[2], cex = 2)
-points(Q$points[p2019.data$Month==7,1], Q$points[p2019.data$Month==7,2], pch=21,bg=my.cols[3], cex = 2)
-points(Q$points[p2019.data$Month==8,1], Q$points[p2019.data$Month==8,2], pch=21,bg=my.cols[4], cex = 2)
-points(Q$points[p2019.data$Month==9,1], Q$points[p2019.data$Month==9,2], pch=21,bg=my.cols[5], cex = 2)
-plot(en)
-legend("topright", legend=c('May','June', 'July','Aug','Sept'), pch=21, pt.bg=c(my.cols),bty = "n", pt.cex = 2) 
-legend("bottomright",legend = c("k = 0.05"),bty = "n")
-dev.off()
-
-plot(Q, display=c('sites','species'),choices=c(1,2), type='n')
-points(Q$points[p2019.data$Storm==1,1], Q$points[p2019.data$Storm==1,2], pch=21,bg="red", cex = 2)
-points(Q$points[p2019.data$Storm==2,1], Q$points[p2019.data$Storm==2,2], pch=21,bg="black", cex = 2)
-points(Q$points[p2019.data$Month==7,1], Q$points[p2019.data$Month==7,2], pch=21,bg=my.cols[3], cex = 2)
-points(Q$points[p2019.data$Month==8,1], Q$points[p2019.data$Month==8,2], pch=21,bg=my.cols[4], cex = 2)
-points(Q$points[p2019.data$Month==9,1], Q$points[p2019.data$Month==9,2], pch=21,bg=my.cols[5], cex = 2)
-plot(en)
-legend("topright", legend=c('May','June', 'July','Aug','Sept'), pch=21, pt.bg=c(my.cols),bty = "n", pt.cex = 2) 
-legend("bottomright",legend = c("k = 0.05"),bty = "n")
-dev.off()
-
-#plot w/ genera overlain - this is just for preliminary interpretation, 
-#these will be difficult to read
-png(filename = "./3_Visualization/NMDS_2019_1_2_genera.png",width = 9,height = 9,units = "in",res = 300)
-fig <- ordiplot(Q, choices = c(1,2))
-text(fig, "species", col="blue", cex=0.6)
-plot(en)
-legend("bottomright",legend = c("k = 0.05"),bty = "n")
-dev.off()
 

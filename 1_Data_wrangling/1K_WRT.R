@@ -1,4 +1,4 @@
-#1H_WRT
+#1K_WRT
 #Author: Mary Lofton
 #Date: 22FEB21
 
@@ -7,14 +7,8 @@
 pacman::p_load(tidyverse, lubridate, data.table)
 rm(list=ls())
 
-# #download data from EDI
-# data  <- "https://portal.edirepository.org/nis/dataviewer?packageid=edi.202.7&entityid=f5fa5de4b49bae8373f6e7c1773b026e"
-# destination <- "./00_Data_files"
-# 
-# download.file(data,destfile = "./00_Data_files/discharge.csv", method='libcurl')
-
 #read in discharge data
-inf <- read_csv("./00_Data_files/discharge.csv") %>%
+inf <- read_csv("./0_Data_files/discharge.csv") %>%
   select(DateTime, WVWA_Flow_cms) %>%
   mutate(Date = date(DateTime)) %>%
   mutate(MonthDay = format(Date, format="%m-%d")) %>%
@@ -35,4 +29,4 @@ ggplot(data = inf, aes(x = Date, y = WRT_day))+
   geom_line()+
   theme_classic()
 
-write.csv(inf, "./00_Data_files/WRT.csv",row.names = FALSE)
+write.csv(inf, "./0_Data_files/WRT.csv",row.names = FALSE)

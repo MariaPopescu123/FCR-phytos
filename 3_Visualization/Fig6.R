@@ -1,4 +1,4 @@
-#Fig. 4
+#Fig6
 #Author: Mary Lofton
 #Date: 23FEB21
 
@@ -74,10 +74,6 @@ phytos3 <- as.matrix(phytos2)
 
 
 ####RUN THE NMDS FOR ALL YEARS####
-
-# #calculate Hellinger distance - FOR COMMUNITY DATA
-# WHY WOULD I DO THIS??
-# hellinger_vars <- decostand(phytos[,-c(1:3)], method = "hellinger")
 
 
 #based on results of scree plot, the best choice for k is 3

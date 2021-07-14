@@ -2,8 +2,7 @@
 #Author: Mary Lofton
 #Date: 13OCT20
 
-#next steps
-#run ARIMAs for EM vs non-EM years
+####SET-UP####
 
 #need to check normality of all vars and correlation of drivers and fix as needed
 pacman::p_load(PerformanceAnalytics, tidyverse, lubridate, forecast, utils, igraph,RColorBrewer)
@@ -268,6 +267,7 @@ d1 <- d %>%
 dnoEM <- d1 %>%
   mutate_at(vars(-Date),scale) 
 
+####ARIMAS FOR ALL YEARS####
 
 #find best-fit ARIMA model for peak depth
 #subset to drivers and responses
@@ -544,7 +544,7 @@ for (i in 1:nrow(good)){
   
 }
 
-##single years
+####LOOKING AT MANIPULATION VS. REFERENCE YEARS####
 
 #peak depth
 

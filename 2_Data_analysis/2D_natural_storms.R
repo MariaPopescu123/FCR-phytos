@@ -2,9 +2,11 @@
 #Author: Mary Lofton
 #Date: 17DEC20
 
+#load packages and clear environment
 pacman::p_load(tidyverse, lubridate, cowplot, grid, data.table)
 rm(list=ls())
 
+#read in and wrangle data
 met <- fread("./0_Data_files/Met_final_2015_2020.csv", fill = TRUE, blank.lines.skip = FALSE,select = c("DateTime",
                                                                                                          "Rain_Total_mm",                                                        
                                                                                                          "WindSpeed_Average_m_s",
@@ -21,8 +23,6 @@ met2 <- met %>%
   filter(MonthDay >= "05-01" & MonthDay <= "09-20") %>%
   mutate(Year = year(Date)) %>%
   filter(Year %in% c(2016:2019))
-
-
 
 met3 <- met %>%
   mutate(Year = year(Date)) %>%

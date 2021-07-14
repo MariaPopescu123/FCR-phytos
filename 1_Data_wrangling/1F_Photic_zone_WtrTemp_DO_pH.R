@@ -1,4 +1,4 @@
-#1E_Photic_zone_WtrTemp_DO_pH
+#1F_Photic_zone_WtrTemp_DO_pH
 #Author: Mary Lofton
 #Date: 22FEB21
 
@@ -8,7 +8,7 @@ pacman::p_load(tidyverse, lubridate, data.table,zoo)
 rm(list=ls())
 
 #read in sample dates and depths of phyto samples
-sample_info <- read_csv("./00_Data_files/EDI_phytos/phytoplankton.csv") %>%
+sample_info <- read_csv("./0_Data_files/EDI_phytos/phytoplankton.csv") %>%
   select(Date, Depth_m) %>%
   distinct()
 sample_info$number <- 1:100
@@ -16,7 +16,7 @@ sample_info$number <- 1:100
 #read in FP data so can match temp profiles to hour FP profiles were taken
 replacement_dates <- as.Date(c("2016-07-12","2018-05-24","2019-07-03","2019-07-11","2019-07-18","2019-10-22"))
 
-fp_sample <- read_csv("./00_Data_files/FP.csv")%>%
+fp_sample <- read_csv("./0_Data_files/FP.csv")%>%
   mutate(Date = date(DateTime),
          Hour = hour(DateTime)) %>%
   filter(Reservoir == "FCR" & Site == 50) %>%
@@ -58,7 +58,7 @@ fp_sample <- fp_sample %>%
 fp_sample <- fp_sample[-81,]
 
 #read in CTD data and limit to temperature, DO, pH
-ctd <- fread("./00_Data_files/CTD.csv")
+ctd <- fread("./0_Data_files/CTD.csv")
 ctd <- tibble(ctd) %>%
   select(Reservoir, Site, Date, Depth_m, Temp_C, DO_mgL, pH) %>%
   filter(Reservoir == "FCR" & Site == 50 & date(Date) %in% sample_info$Date) %>%
@@ -94,7 +94,7 @@ final <- final %>%
   select(Date, Depth_m, Temp_C, DO_mgL, pH)
 
 #trim depths to depth of photic zone
-pz <- read_csv("./00_Data_files/Kd.csv") %>%
+pz <- read_csv("./0_Data_files/Kd.csv") %>%
   mutate(pz_depth_m = ifelse(is.na(CTD_pz_depth_m) & is.na(YSI_pz_depth_m) & is.na(Secchi_pz_depth_m),NA,
                              ifelse(is.na(CTD_pz_depth_m) & is.na(YSI_pz_depth_m),Secchi_pz_depth_m,
                                     ifelse(is.na(CTD_pz_depth_m),YSI_pz_depth_m,CTD_pz_depth_m)))) %>%
@@ -126,7 +126,7 @@ CTD_pz_vars <- final %>%
 colnames(CTD_pz_vars)<- c("Date","pz_Temp_C","pz_DO_mgL","pz_pH","Interp_pz_depth_m")
 
 #read in YSI data and limit to temperature, DO, pH
-ysi <- read_csv("./00_Data_files/YSI.csv") %>%
+ysi <- read_csv("./0_Data_files/YSI.csv") %>%
   select(Reservoir, Site, DateTime, Depth_m, Temp_C, DO_mgL, pH) %>%
   mutate(Date = as.POSIXct(DateTime, format = "%m/%d/%y %H:%M")) %>%
   select(-DateTime)%>%
@@ -186,7 +186,7 @@ colnames(ysi_pz_vars)<- c("pz_Temp_C","pz_DO_mgL","pz_pH","Date","Interp_pz_dept
 ysi_pz_vars <- ysi_pz_vars[,-5]
 
 #read in SCC data
-scc <- read_csv("./00_Data_files/SCC.csv") %>%
+scc <- read_csv("./0_Data_files/SCC.csv") %>%
   select(DateTime:ThermistorTemp_C_9) %>%
   filter(date(DateTime) %in% sample_info$Date)
 
@@ -251,6 +251,7 @@ scc_pz_vars <- final %>%
   select(-Depth_m)
 colnames(scc_pz_vars)<- c("Date","pz_Temp_C")
 
+#combine data from all three sources (CTD, YSI, SCC thermistor string) into a single data frame
 Tmetrics <- data.frame(sample_info$Date)
 colnames(Tmetrics) <- "Date"
 
@@ -263,4 +264,4 @@ colnames(Tmetrics3)[9] <- paste("SCC", colnames(Tmetrics3)[9], sep = "_")
 
 
 
-write.csv(Tmetrics3,"./00_Data_files/pz_WtrTemp_DO_pH.csv",row.names = FALSE)
+write.csv(Tmetrics3,"./0_Data_files/pz_WtrTemp_DO_pH.csv",row.names = FALSE)

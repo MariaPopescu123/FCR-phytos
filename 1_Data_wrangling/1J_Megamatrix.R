@@ -1,4 +1,4 @@
-#1H_Megamatrix
+#1J_Megamatrix
 #Author: Mary Lofton
 #Date: 30SEP20
 
@@ -10,15 +10,15 @@ pacman::p_load(tidyverse, lubridate)
 rm(list=ls())
 
 #Hox/EM operation
-hoxem <- read_csv("./00_Data_files/HOX_EM_operation.csv") %>%
+hoxem <- read_csv("./0_Data_files/HOX_EM_operation.csv") %>%
   mutate(Year = year(Date))
 
 #chemistry
-chem <- read_csv("./00_Data_files/chem_vars.csv") %>%
+chem <- read_csv("./0_Data_files/chem_vars.csv") %>%
   mutate(Year = year(Date))
 
 #wtr temp and stability and DO
-wts <- read_csv("./00_Data_files/WtrTemp_Stability_DO_pH.csv") %>%
+wts <- read_csv("./0_Data_files/WtrTemp_Stability_DO_pH.csv") %>%
   mutate(Year = year(Date)) %>%
   mutate(Temp_DO_Depth_m = ifelse((is.na(CTD_Depth_m) & is.na(YSI_Depth_m)),SCC_Depth_m,
                                ifelse(is.na(CTD_Depth_m),YSI_Depth_m,CTD_Depth_m)),
@@ -43,7 +43,7 @@ wts <- read_csv("./00_Data_files/WtrTemp_Stability_DO_pH.csv") %>%
 
 
 #PAR
-par <- read_csv("./00_Data_files/Kd.csv") %>%
+par <- read_csv("./0_Data_files/Kd.csv") %>%
   mutate(Year = year(Date)) %>%
   mutate(Kd = ifelse(is.na(CTD_Kd) & is.na(YSI_Kd) & is.na(Secchi_Kd),NA,
                              ifelse(is.na(CTD_Kd) & is.na(YSI_Kd),Secchi_Kd,
@@ -57,7 +57,7 @@ par <- read_csv("./00_Data_files/Kd.csv") %>%
   select(Year,Date,Kd,perc_light_thermocline, perc_light_Cmax,pz_depth_m,perc_light_grab)
 
 #photic zone temp, DO, pH
-pz.vars <- read_csv("./00_Data_files/pz_WtrTemp_DO_pH.csv") %>%
+pz.vars <- read_csv("./0_Data_files/pz_WtrTemp_DO_pH.csv") %>%
   mutate(Year = year(Date),
          pz_Temp_C = ifelse(is.na(CTD_pz_Temp_C)&is.na(YSI_pz_Temp_C),SCC_pz_Temp_C,
                             ifelse(is.na(CTD_pz_Temp_C),YSI_pz_Temp_C,CTD_pz_Temp_C)),
@@ -67,20 +67,20 @@ pz.vars <- read_csv("./00_Data_files/pz_WtrTemp_DO_pH.csv") %>%
   select(Year, Date, pz_Temp_C, pz_DO_mgL, pz_pH, interp_pz_depth_m)
 
 #WRT
-wrt <- read_csv("./00_Data_files/WRT.csv")%>%
+wrt <- read_csv("./0_Data_files/WRT.csv")%>%
   mutate(Year = year(Date)) %>%
   select(Year, Date, WRT_day)
 
 #FP distribution metrics
-dist <- read_csv("./00_Data_files/FP_DistributionMetrics.csv") %>%
+dist <- read_csv("./0_Data_files/FP_DistributionMetrics.csv") %>%
   mutate(Year = year(Date))
 
 #biodiversity metrics
-bd <- read_csv("./00_Data_files/Biodiversity.csv") %>%
+bd <- read_csv("./0_Data_files/Biodiversity.csv") %>%
   mutate(Year = year(Date))
 
 #community structure
-cs <- read_csv("./00_Data_files/Community_structure.csv") %>%
+cs <- read_csv("./0_Data_files/Community_structure.csv") %>%
   mutate(Year = year(Date))
 
 #join all vars
@@ -95,7 +95,7 @@ mega5 <- left_join(mega4, cs, by = c("Year","Date"))
 mega6 <- mega5[,c(6,1:5,7:73)]
 
 #write megamatrix to file
-#write.csv(mega6, "./2_Data_analysis/megamatrix.csv",row.names = FALSE)
+write.csv(mega6, "./2_Data_analysis/megamatrix.csv",row.names = FALSE)
 
 
 #DATA WRANGLING FOR FP DISTRIBUTION METRIC ARIMAS
@@ -176,12 +176,7 @@ check <- mega13 %>%
         
 #limit to columns needed for phyto comm structure ARIMAs
 colnames(mega13)
-#mega14 <- mega13[,c(1:22,27:50)]
 
 
 #write megamatrix for phyto comm structure ARIMAs to file
 write.csv(mega13, "./2_Data_analysis/CS_megamatrix.csv",row.names = FALSE)
-
-##FROM HERE:
-#run separate for-loop for phyto community structure ONLY 
-#(will have to develop new script)

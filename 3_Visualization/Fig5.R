@@ -1,4 +1,4 @@
-#1G_Community_structure
+#Fig5
 #Author: Mary Lofton
 #Date: 17SEP20
 

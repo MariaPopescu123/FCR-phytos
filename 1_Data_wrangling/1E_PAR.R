@@ -1,4 +1,4 @@
-#1D_PAR
+#1E_PAR
 #Author: Mary Lofton
 #Date: 16SEP20
 
@@ -12,15 +12,9 @@
 pacman::p_load(tidyverse, lubridate, data.table)
 rm(list=ls())
 
-# #download data from EDI
-# data  <- "https://portal.edirepository.org/nis/dataviewer?packageid=edi.198.8&entityid=336d0a27c4ae396a75f4c07c01652985"
-# destination <- "./00_Data_files"
-# 
-# download.file(data,destfile = "./00_Data_files/Secchi.csv", method='libcurl')
-
 
 #read in sample dates and depths of phyto samples
-sample_info <- read_csv("./00_Data_files/EDI_phytos/phytoplankton.csv") %>%
+sample_info <- read_csv("./0_Data_files/EDI_phytos/phytoplankton.csv") %>%
   select(Date, Depth_m) %>%
   distinct()
 sample_info$number <- 1:100
@@ -28,7 +22,7 @@ sample_info$number <- 1:100
 #read in FP data so can match temp profiles to hour FP profiles were taken
 replacement_dates <- as.Date(c("2016-07-12","2018-05-24","2019-07-03","2019-07-11","2019-07-18","2019-10-22"))
 
-fp_sample <- read_csv("./00_Data_files/FP.csv")%>%
+fp_sample <- read_csv("./0_Data_files/FP.csv")%>%
   mutate(Date = date(DateTime),
          Hour = hour(DateTime)) %>%
   filter(Reservoir == "FCR" & Site == 50) %>%
@@ -72,10 +66,10 @@ fp_sample <- fp_sample[-81,]
 #read in CTD data and limit to PAR
 # data  <- "https://portal.edirepository.org/nis/dataviewer?packageid=edi.200.11&entityid=d771f5e9956304424c3bc0a39298a5ce"
 # 
-# destination <- "./00_Data_files"
+# destination <- "./0_Data_files"
 # 
-# download.file(data, destfile = "./00_Data_files/CTD.csv", method='libcurl')
-ctd <- fread("./00_Data_files/CTD.csv")
+# download.file(data, destfile = "./0_Data_files/CTD.csv", method='libcurl')
+ctd <- fread("./0_Data_files/CTD.csv")
 ctd <- data.frame(ctd) %>%
   select(Reservoir, Site, Date, Depth_m, PAR_umolm2s) %>%
   filter(Reservoir == "FCR" & Site == 50 & date(Date) %in% sample_info$Date) %>%
@@ -114,7 +108,7 @@ ctd_par <- final %>%
 #only calculating Kd for now because don't have incident light for most profiles
 
 #read in data to pull thermocline depth
-wts <- read_csv("./00_Data_files/WtrTemp_Stability.csv") %>%
+wts <- read_csv("./0_Data_files/WtrTemp_Stability.csv") %>%
   mutate(Year = year(Date)) %>%
   mutate(Temp_Depth_m = ifelse((is.na(CTD_Depth_m) & is.na(YSI_Depth_m)),SCC_Depth_m,
                                ifelse((is.na(CTD_Depth_m)),YSI_Depth_m,CTD_Depth_m)),
@@ -132,7 +126,7 @@ thermo_CTD_dates <- wts %>%
   filter(Date %in% par_dates)
 
 #read in cmax depths
-cmax <- read_csv("./00_Data_files/FP_DistributionMetrics.csv") %>%
+cmax <- read_csv("./0_Data_files/FP_DistributionMetrics.csv") %>%
   select(Date, Peak_depth_m) %>%
   filter(Date %in% par_dates)
 
@@ -194,7 +188,7 @@ ctd_kd <- final
 
 #check <- left_join(ctd_kd,sample_info,by = "Date")
 #read in YSI data and limit to PAR
-ysi <- read_csv("./00_Data_files/YSI.csv") %>%
+ysi <- read_csv("./0_Data_files/YSI.csv") %>%
   select(Reservoir, Site, DateTime, Depth_m, PAR_umolm2s) %>%
   mutate(Date = as.POSIXct(DateTime, format = "%m/%d/%y %H:%M")) %>%
   select(-DateTime)%>%
@@ -247,7 +241,7 @@ thermo_YSI_dates <- wts %>%
   filter(Date %in% par_dates)
 
 #read in cmax depths
-cmax <- read_csv("./00_Data_files/FP_DistributionMetrics.csv") %>%
+cmax <- read_csv("./0_Data_files/FP_DistributionMetrics.csv") %>%
   select(Date, Peak_depth_m) %>%
   filter(Date %in% par_dates)
 
@@ -306,7 +300,7 @@ final <- data.frame(final) %>%
 ysi_kd <- final[-c(27,34),]
 
 #add Secchi as last resort
-secchi <- read_csv("./00_Data_files/Secchi.csv") %>%
+secchi <- read_csv("./0_Data_files/Secchi.csv") %>%
   filter(Reservoir == "FCR" & Site == 50 & date(DateTime) %in% sample_info$Date)%>%
   mutate(Date = date(DateTime))
 
@@ -323,6 +317,7 @@ hist(ctd_kd$CTD_pz_depth_m)
 hist(ysi_kd$YSI_Kd)
 hist(ysi_kd$YSI_pz_depth_m)
 
+#combine Kd from all sources into a single data frame
 
 Kd <- data.frame(sample_info$Date)
 colnames(Kd) <- "Date"
@@ -334,10 +329,10 @@ Kd3 <- Kd3[-c(30,31),]
 check <- Kd3 %>%
   filter(is.na(CTD_Kd) & is.na(YSI_Kd) & is.na(Secchi_Kd))
 
-write.csv(Kd3, "./00_Data_files/Kd.csv",row.names = FALSE)
+write.csv(Kd3, "./0_Data_files/Kd.csv",row.names = FALSE)
 
 #visualization
-Kd <- read_csv("./00_Data_files/Kd.csv")
+Kd <- read_csv("./0_Data_files/Kd.csv")
 
 Kd_plot <- Kd %>%
   select(Date, CTD_Kd, YSI_Kd)%>%

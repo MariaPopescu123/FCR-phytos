@@ -1,4 +1,4 @@
-#1G_Community_structure
+#1I_Community_structure
 #Author: Mary Lofton
 #Date: 17SEP20
 
@@ -26,7 +26,7 @@ dat <- dir(path = "C:/Users/Mary Lofton/Dropbox/Ch_2/BV_concentration/Pelagic/Si
 
 dat1 <- dat %>% 
   mutate(BV_um3mL = as.double(BV_um3mL)) %>%
-  select(Sample_date, Site, Depth, Genus, BV_um3mL) %>%
+  select(Date, Site, Depth, Genus, BV_um3mL) %>%
   mutate(Genus = ifelse(Genus == "unicell Chlorophyte spp. 1" | Genus == "unicell Chlorophyte sp. 1" | Genus == "chlorophyte spp. 1" | Genus == "Chlorophyte spp. 1" | Genus == "Chlorella" | Genus == "Chorella","Chlorophyte sp. 1",Genus)) %>%
   mutate(Genus = ifelse(Genus == "unicell Chlorophyte spp. 2" | Genus == "unicell Chlorophyte sp. 2" | Genus == "Chlorophyte spp. 2" | Genus == "Chlorophyte sp. 2" | Genus == "unicell Chlorophyte spp. 6" | Genus == "unicell Chlorophyte sp. 6" | Genus == "Chlorophyte spp. 6" | Genus == "Chlorophyte sp. 6","Rhodomonas",Genus)) %>%
   mutate(Genus = ifelse(Genus == "Chlorophyte spp. 3" | Genus == "unicell Chlorophyte spp. 3","Chlorophyte sp. 3",Genus)) %>%
@@ -46,17 +46,19 @@ dat1 <- dat %>%
   mutate(Genus = ifelse(Genus == "dinoflagellate cyst","Prorocentrum",Genus)) %>%
   mutate(Genus = ifelse(Genus == "Dicytosphaerium" | Genus == "Dictyospaerium" | Genus == "Dicytospherium","Dictyosphaerium",Genus)) %>%
   mutate(Genus = ifelse(Genus == "Euglenoid/Cryptomonoid" | Genus == "Euglenoid/Cryptomonoid 2" | Genus == "Cryptophyte","Cryptomonas",Genus)) %>%
-  mutate(Sample_date = ifelse(Sample_date == "7/10/2017","2017-07-10",Sample_date)) %>%
-  mutate(Sample_date = ifelse(Sample_date == "2019-10-18","2019-10-16",Sample_date)) %>%
+  mutate(Date = ifelse(Date == "7/10/2017","2017-07-10",Date)) %>%
+  mutate(Date = ifelse(Date == "2019-10-18","2019-10-16",Date)) %>%
   filter(!Genus == "unknown")
+
+dat1 <- read_csv("./0_Data_files/phytoplankton.csv")
+
 
 #calculate total BV for each sample day
 total_bv <- dat1 %>% filter(Site == 50) %>%
   mutate(BV_um3mL = as.double(BV_um3mL)) %>%
-  group_by(Sample_date) %>%
+  group_by(Date) %>%
   summarize(BV_TOTAL = sum(BV_um3mL, na.rm = TRUE)) %>%
-  mutate(Date = as.Date(Sample_date)) %>%
-  select(-Sample_date)
+  mutate(Date = as.Date(Date)) 
 
 #spectral groups
 #set up vectors of different divisions
@@ -102,9 +104,9 @@ dat2 <- dat1 %>%
                                                                                ifelse(Genus %in% raphid, "Raphids",""))))))))))
 
 dat3 <- dat2 %>%
-  group_by(Sample_date, Phyto_group) %>%
+  group_by(Date, Phyto_group) %>%
   summarize(BV_group = sum(BV_um3mL, na.rm = TRUE)) %>%
-  mutate(Date = as.Date(Sample_date))
+  mutate(Date = as.Date(Date))
 
 dates <- unique(dat3$Date)
 groups <- unique(dat3$Phyto_group)
@@ -135,15 +137,15 @@ dat8 <- left_join(dat6, dat7, by = "Date")
 dat9 <- left_join(dat8, total_bv, by = "Date")
 
 sample_depths <- dat1 %>%
-  rename(Date = Sample_date) %>%
-  select(Date, Depth) %>%
+  rename(Date = Date) %>%
+  select(Date, Depth_m) %>%
   distinct() %>%
-  rename(Phyto_Depth_m = Depth) %>%
+  rename(Phyto_Depth_m = Depth_m) %>%
   mutate(Date = as.Date(Date))
 
 dat10 <- left_join(dat9, sample_depths, by = "Date")
 
-write.csv(dat10, file = "./00_Data_files/Community_structure.csv",row.names = FALSE)
+write.csv(dat10, file = "./0_Data_files/Community_structure.csv",row.names = FALSE)
 
 #plot relative abundance of divisions
 p1 <- ggplot(dat5, aes(x = Date, y = rel_abund_group, group = Phyto_group, color = Phyto_group, fill = Phyto_group)) + 
@@ -169,7 +171,7 @@ ggsave(plot = p2, filename = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/
        device = "png",height = 2.5, width = 6, units = "in")
 
 #further visualization
-cs <- read_csv("./00_Data_files/Community_structure.csv") %>%
+cs <- read_csv("./0_Data_files/Community_structure.csv") %>%
   mutate(Year = year(Date))
 
 ggplot(data = cs, aes(x = Date, y = BV_TOTAL))+

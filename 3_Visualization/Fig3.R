@@ -1,4 +1,4 @@
-#3B_EM_manipulation_data_viz
+#Fig3
 #Author: Mary Lofton
 #Date: 17DEC20
 

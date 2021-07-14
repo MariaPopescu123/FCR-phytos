@@ -1,4 +1,4 @@
-#1C_WtrTemp_Stability
+#1D_WtrTemp_DO_pH_Stability_Thermo.Depth
 #Author: Mary Lofton
 #Date: 15SEP20
 
@@ -9,29 +9,8 @@
 pacman::p_load(tidyverse, lubridate, rLakeAnalyzer, data.table)
 rm(list=ls())
 
-# #download data from EDI
-# data  <- "https://portal.edirepository.org/nis/dataviewer?packageid=edi.200.10&entityid=2461524a7da8f1906bfc3806d594f94c"
-# destination <- "./00_Data_files"
-# 
-# download.file(data,destfile = "./00_Data_files/CTD.csv", method='libcurl')
-# 
-# data  <- "https://portal.edirepository.org/nis/dataviewer?packageid=edi.198.7&entityid=25b5e8b7f4291614d5c6d959a08148d8"
-# destination <- "./00_Data_files"
-# 
-# download.file(data,destfile = "./00_Data_files/YSI.csv", method='libcurl')
-# 
-# data  <- "https://portal.edirepository.org/nis/dataviewer?packageid=edi.271.4&entityid=151ddb643fbfec06e058f27af837e5ae"
-# destination <- "./00_Data_files"
-# 
-# download.file(data,destfile = "./00_Data_files/SCC.csv", method='libcurl')
-
-data  <- "https://portal.edirepository.org/nis/dataviewer?packageid=edi.389.5&entityid=3d1866fecfb8e17dc902c76436239431"
-destination <- "./00_Data_files"
-
-download.file(data,destfile = "./00_Data_files/met.csv", method='libcurl')
-
 #read in sample dates and depths of phyto samples
-sample_info <- read_csv("./00_Data_files/EDI_phytos/phytoplankton.csv") %>%
+sample_info <- read_csv("./0_Data_files/EDI_phytos/phytoplankton.csv") %>%
   select(Date, Depth_m) %>%
   distinct()
 sample_info$number <- 1:100
@@ -39,7 +18,7 @@ sample_info$number <- 1:100
 #read in FP data so can match temp profiles to hour FP profiles were taken
 replacement_dates <- as.Date(c("2016-07-12","2018-05-24","2019-07-03","2019-07-11","2019-07-18","2019-10-22"))
 
-fp_sample <- read_csv("./00_Data_files/FP.csv")%>%
+fp_sample <- read_csv("./0_Data_files/FP.csv")%>%
   mutate(Date = date(DateTime),
          Hour = hour(DateTime)) %>%
   filter(Reservoir == "FCR" & Site == 50) %>%
@@ -81,7 +60,7 @@ fp_sample <- fp_sample %>%
 fp_sample <- fp_sample[-81,]
 
 #read in CTD data and limit to temperature, DO, pH
-ctd <- fread("./00_Data_files/CTD.csv")
+ctd <- fread("./0_Data_files/CTD.csv")
 ctd <- tibble(ctd) %>%
   select(Reservoir, Site, Date, Depth_m, Temp_C, DO_mgL, pH) %>%
   filter(Reservoir == "FCR" & Site == 50 & date(Date) %in% sample_info$Date) %>%
@@ -156,7 +135,7 @@ ctd_new <- ctd_new %>%
 colnames(ctd_new)[2:11] <- paste("wtr", colnames(ctd_new)[2:11], sep = "_")
 
 wtr_ctd <- ctd_new
-bathy <- load.bathy("./00_Data_files/FCR.bth")
+bathy <- load.bathy("./0_Data_files/FCR.bth")
 
 #calculate Schmidt stability
 ss_ctd <- ts.schmidt.stability(wtr = wtr_ctd, bathy = bathy, na.rm = TRUE)
@@ -200,7 +179,7 @@ mean(meta_ctd$top, na.rm = TRUE)
 mean(meta_ctd$bottom, na.rm = TRUE)
 
 #find water temperature at depth of Cmax
-cmax <- read_csv("./00_Data_files/FP_DistributionMetrics.csv")
+cmax <- read_csv("./0_Data_files/FP_DistributionMetrics.csv")
 
 depths = cmax$Peak_depth_m
 dates  = cmax$Date
@@ -279,7 +258,7 @@ ctd_final <- left_join(ctd_all2, bf_ctd, by = "Date")
 
 
 #read in YSI data and limit to temperature
-ysi <- read_csv("./00_Data_files/YSI.csv") %>%
+ysi <- read_csv("./0_Data_files/YSI.csv") %>%
   select(Reservoir, Site, DateTime, Depth_m, Temp_C, DO_mgL, pH) %>%
   mutate(Date = as.POSIXct(DateTime, format = "%m/%d/%y %H:%M")) %>%
   select(-DateTime)%>%
@@ -353,7 +332,7 @@ ysi_new <- ysi_new[-c(36, 64:67),]
 colnames(ysi_new)[2:12] <- paste("wtr", colnames(ysi_new)[2:12], sep = "_")
 
 wtr_ysi <- ysi_new
-bathy <- load.bathy("./00_Data_files/FCR.bth")
+bathy <- load.bathy("./0_Data_files/FCR.bth")
 
 #calculate Schmidt stability
 ss_ysi <- ts.schmidt.stability(wtr = wtr_ysi, bathy = bathy, na.rm = TRUE)
@@ -392,7 +371,7 @@ ggplot(data = bf_ysi1, aes(x = datetime, y = n2))+
   theme_classic()
 
 #find water temperature at depth of Cmax
-cmax <- read_csv("./00_Data_files/FP_DistributionMetrics.csv")
+cmax <- read_csv("./0_Data_files/FP_DistributionMetrics.csv")
 
 depths = cmax$Peak_depth_m
 dates  = cmax$Date
@@ -470,7 +449,7 @@ ysi_final <- ysi_final[-c(66:69, 71),]
 
 
 #read in SCC data and limit to temperature
-scc <- fread("./00_Data_files/SCC.csv")
+scc <- fread("./0_Data_files/SCC.csv")
 scc <- tibble(scc) %>%
   select(DateTime:ThermistorTemp_C_9) %>%
   filter(date(DateTime) %in% sample_info$Date)
@@ -510,7 +489,7 @@ final <- final %>%
 scc_new <- final
 
 wtr_scc <- scc_new
-bathy <- load.bathy("./00_Data_files/FCR.bth")
+bathy <- load.bathy("./0_Data_files/FCR.bth")
 
 #calculate Schmidt stability
 ss_scc <- ts.schmidt.stability(wtr = wtr_scc, bathy = bathy, na.rm = TRUE)
@@ -549,7 +528,7 @@ ggplot(data = bf_scc1, aes(x = datetime, y = n2))+
   theme_classic()
 
 #find water temperature at depth of Cmax
-cmax <- read_csv("./00_Data_files/FP_DistributionMetrics.csv")
+cmax <- read_csv("./0_Data_files/FP_DistributionMetrics.csv")
 
 depths = cmax$Peak_depth_m
 dates  = cmax$Date
@@ -606,7 +585,7 @@ scc_all1 <- left_join(scc_all, td_scc, by = "Date")
 scc_all2 <- left_join(scc_all1, df.final.grab, by = "Date")
 scc_final <- left_join(scc_all2, bf_scc, by = "Date")
 
-
+#join data frames from three data sources (CTD, YSI, SCC thermistor string) into one final data fram
 Tmetrics <- data.frame(sample_info$Date)
 colnames(Tmetrics) <- "Date"
 
@@ -619,5 +598,5 @@ colnames(Tmetrics3)[20:26] <- paste("SCC", colnames(Tmetrics3)[20:26], sep = "_"
 
 Tmetrics4 <- Tmetrics3
 
-write.csv(Tmetrics4, "./00_Data_files/WtrTemp_Stability_DO_pH.csv",row.names = FALSE)
+write.csv(Tmetrics4, "./0_Data_files/WtrTemp_Stability_DO_pH.csv",row.names = FALSE)
 

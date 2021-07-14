@@ -1,4 +1,4 @@
-#Results reproduction of Intro figure
+#Fig4
 #Author: Mary Lofton
 #Date: 25MAR21
 
