@@ -2,6 +2,7 @@
 /*
 # Except this file
 !/.gitignore
+!readme.txt
 !/Fig3.R
 !/Fig4.R
 !/Fig5.R
