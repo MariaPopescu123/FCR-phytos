@@ -65,7 +65,7 @@ p1 <- ggplot(data = no_em, aes(x = metric, y = value, group = metric, color = me
         panel.background = element_rect(fill = "transparent"), # bg of the panel
         plot.background = element_rect(fill = "transparent", color = NA))
 p1
-ggsave(p1, filename = "./3_Visualization/conceptual_fig_reproduction_no_EM.png",
+ggsave(p1, filename = "./3_Visualization/Fig4A.png",
        device = "png",height = 6.5, width = 6, units = "in", dpi = 300, bg = "transparent")
 
 
@@ -89,7 +89,7 @@ p2 <- ggplot(data = em, aes(x = metric, y = value, group = metric, color = metri
         panel.background = element_rect(fill = "transparent"), # bg of the panel
         plot.background = element_rect(fill = "transparent", color = NA))
 p2
-ggsave(p2, filename = "./3_Visualization/conceptual_fig_reproduction_EM.png",
+ggsave(p2, filename = "./3_Visualization/Fig4C.png",
        device = "png",height = 6.5, width = 6, units = "in", dpi = 300, bg = "transparent")
 
 
@@ -141,11 +141,11 @@ p3 <- ggplot(data = em, aes(x = magnitude, y = max_depth, color = var))+
   theme(axis.text.x = element_text(angle = 45,hjust = 1),
         axis.text = element_text(size = 18),
         strip.background = element_blank(),
-        strip.text = element_text(size = 13.5),
+        strip.text = element_text(size = 16),
         strip.placement = "outside",
         axis.title = element_text(size = 20))
 p3
-ggsave(p3, filename = "./3_Visualization/conceptual_fig_reproduction_EM_mag.png",
+ggsave(p3, filename = "./3_Visualization/Fig4D.png",
        device = "png",height = 6.25, width = 9, units = "in", dpi = 300)
 
 
@@ -172,6 +172,6 @@ p4 <- ggplot(data = no_em, aes(x = magnitude, y = max_depth, color = var))+
         strip.placement = "outside",
         axis.title.y = element_text(size = 20))
 p4
-ggsave(p4, filename = "./3_Visualization/conceptual_fig_reproduction_no_EM_mag.png",
+ggsave(p4, filename = "./3_Visualization/Fig4B.png",
        device = "png",height = 6.25, width = 9, units = "in", dpi = 300)
 

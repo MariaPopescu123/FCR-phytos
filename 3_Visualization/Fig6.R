@@ -155,7 +155,7 @@ plot(en12_EM, col = "black")
 legend("bottomleft",legend = c("2016","2017","2018","2019"), pch = c(10,8,23,25), pt.bg = c(NA,NA,"black","black"), bty = "n", pt.cex = 2)
 #legend(x = -2, y = -0.2,legend = c("May","June","July","August","September"), pch = 22, pt.bg = my.cols, bty = "n", pt.cex = 2)
 legend("topright",legend = c("k = 0.11"),bty = "n")
-title("A. all years",adj = 0, line = 0.5)
+title("A. all summers",adj = 0, line = 0.5)
 
 plot(Q, display=c('sites'),choices=c(1,3), type='n')
 my.cols = gg_color_hue(5)
@@ -193,7 +193,7 @@ legend("bottomleft",legend = c("2016","2017","2018","2019"), pch = c(10,8,23,25)
 #legend("bottomleft",legend = c("2016 (EM)","2017 (EM)","2018 (no EM)","2019 (no EM)"), pch = c(10,8,23,25), pt.bg = c(NA,NA,"black","black"), bty = "n", pt.cex = 2)
 #legend("bottomright",legend = c("May","June","July","August","September"), pch = 22, pt.bg = my.cols, bty = "n", pt.cex = 2)
 legend("topright",legend = c("k = 0.11"),bty = "n")
-title("B. all years",adj = 0, line = 0.5)
+title("B. all summers",adj = 0, line = 0.5)
 
 #read in environmental data
 my.cs.data <- read_csv("./2_Data_analysis/CS_megamatrix.csv") %>%

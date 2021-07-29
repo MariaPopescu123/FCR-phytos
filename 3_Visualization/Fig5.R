@@ -171,7 +171,7 @@ p1 <- ggplot(first2, aes(x = Date, y = rel_abund_group, group = Phyto_group, col
   geom_vline(aes(xintercept=date("2016-07-25"),linetype="EM"), size=1) +
   geom_vline(aes(xintercept=date("2017-05-30"),linetype="EM"), size=1) +
   geom_vline(aes(xintercept=date("2017-07-10"),linetype="EM"), size=1) +
-  scale_linetype_manual(name = "Mixing events", values = c(Storm = "solid", EM = "dashed"), guide = FALSE)+
+  scale_linetype_manual(name = "Deepening events", values = c(Storm = "solid", EM = "dashed"), guide = FALSE)+
   xlab("")+
   mytheme1
 p1
@@ -192,7 +192,7 @@ p2 <- ggplot(second2, aes(x = Date, y = rel_abund_group, fill = Phyto_group)) +
   scale_y_continuous(expand = c(0,0))+
   geom_vline(aes(xintercept=date("2019-06-08"),linetype="Storm"), size=1) +
   geom_vline(aes(xintercept=date("2016-06-27"),linetype="EM"), size=1) +
-    scale_linetype_manual(name = "Mixing events", values = c(Storm = "solid", EM = "dashed"),
+    scale_linetype_manual(name = "Deepening events", values = c(Storm = "solid", EM = "dashed"),
                         guide = guide_legend(override.aes = list(color = "white")))+
   xlab("")+
   mytheme1+
@@ -237,7 +237,7 @@ p3 <- ggplot(data = first2, aes(x = Date, y = log(BV_TOTAL))) +
   geom_vline(aes(xintercept=date("2016-07-25"),linetype="EM"), size=1) +
   geom_vline(aes(xintercept=date("2017-05-30"),linetype="EM"), size=1) +
   geom_vline(aes(xintercept=date("2017-07-10"),linetype="EM"), size=1) +
-  scale_linetype_manual(name = "Mixing events", values = c(Storm = "solid", EM = "dashed"))+
+  scale_linetype_manual(name = "Deepening events", values = c(Storm = "solid", EM = "dashed"))+
   guides(linetype=guide_legend(
     keywidth=0.5,
     keyheight=0.5,
@@ -256,7 +256,7 @@ p4 <- ggplot(data = second2, aes(x = Date, y = log(BV_TOTAL))) +
   coord_cartesian(ylim = c(11,16.5))+
   geom_vline(aes(xintercept=date("2019-06-08"),linetype="Storm"), size=1) +
   geom_vline(aes(xintercept=date("2016-06-27"),linetype="EM"), size=1) +
-   scale_linetype_manual(name = "Mixing events", values = c(Storm = "solid", EM = "dashed"),
+   scale_linetype_manual(name = "Deepening events", values = c(Storm = "solid", EM = "dashed"),
                         guide = guide_legend(override.aes = list(color = "white")))+
   mytheme2+
   theme(

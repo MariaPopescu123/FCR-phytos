@@ -113,7 +113,7 @@ tiff(filename = "./3_Visualization/Fig5.tif",width = 6.5,height = 9.75,units = "
 par(mfrow = c(3,2),mar = c(3,3,1.5,0),mgp = c(1.5,0.5,0))
 
 plot(Q, display=c('sites','species'),choices=c(1,2), type='n')
-title("A. all years", adj = 0.02, line = 0.5)
+title("A. all summers", adj = 0.02, line = 0.5)
 ordisurf(Q, my.cs.data$Peak_depth_m, display = c("sites", "species"),choices = c(1,2), type = "n",main = "",
          levels = c(3.6), add = TRUE, penalty = 1.4, method = "ML", col = "gray39")
 ordisurf(Q, my.cs.data$Peak_depth_m, display = c("sites", "species"),choices = c(1,2), type = "n",main = "",
@@ -142,7 +142,7 @@ legend("bottomleft",legend = c("Cyano","Chloro","Baci","Chryso","Dino","Desmid",
        bty = "n")
 
 plot(Q, display=c('sites','species'),choices=c(1,3), type='n')
-title("B. all years", adj = 0.02, line = 0.5)
+title("B. all summers", adj = 0.02, line = 0.5)
 ordisurf(Q, my.cs.data$Peak_depth_m, display = c("sites", "species"),choices = c(1,3), type = "n",main = "",
          levels = c(3.6), add = TRUE, penalty = 1.4, method = "ML", col = "gray39")
 ordisurf(Q, my.cs.data$Peak_depth_m, display = c("sites", "species"),choices = c(1,3), type = "n",main = "",
