@@ -32,10 +32,12 @@ met3 <- met %>%
 rain_storms <- met2 %>%
   filter(daily_precip > quantile(daily_precip, 0.95)) %>%
   mutate(rain_storm = "TRUE")
+quantile(met2$daily_precip, 0.95)
 
 wind_storms <- met2 %>%
   filter(daily_wind > quantile(daily_wind, 0.95)) %>%
   mutate(wind_storm = "TRUE")
+quantile(met2$daily_wind, 0.95)
 
 all_storms <- full_join(rain_storms, wind_storms)
 
@@ -79,7 +81,7 @@ p2016 <- ggplot(data = subset(mydata, mydata$Year == 2016), aes(x = Date, y = th
   geom_vline(xintercept = as.numeric(as.Date("2016-07-25")), lty = 2)+
   ylab("Thermocline depth (m)")+
   xlab("")+
-  ggtitle("A. 2016")+
+  ggtitle("C. 2016")+
   theme_classic()+
   theme(axis.title = element_text(size = 16),axis.text = element_text(size = 16),plot.title = element_text(size = 18))
 
@@ -92,7 +94,7 @@ p2017 <- ggplot(data = subset(mydata, mydata$Year == 2017), aes(x = Date, y = th
   geom_vline(xintercept = as.numeric(as.Date("2017-07-10")), lty = 2)+
   ylab("Thermocline depth (m)")+
   xlab("")+
-  ggtitle("B. 2017")+
+  ggtitle("F. 2017")+
   theme_classic()+
   theme(axis.title = element_text(size = 16),axis.text = element_text(size = 16),plot.title = element_text(size = 18))
 
@@ -103,7 +105,7 @@ p2018 <- ggplot(data = subset(mydata, mydata$Year == 2018), aes(x = Date, y = th
   ylim(6,0)+
   ylab("Thermocline depth (m)")+
   xlab("")+
-  ggtitle("C. 2018")+
+  ggtitle("I. 2018")+
   theme_classic()+
   theme(axis.title = element_text(size = 16),axis.text = element_text(size = 16),plot.title = element_text(size = 18))
 
@@ -115,14 +117,14 @@ p2019 <- ggplot(data = subset(mydata, mydata$Year == 2019), aes(x = Date, y = th
   ylab("Thermocline depth (m)")+
   geom_vline(xintercept = as.numeric(as.Date("2019-06-08")))+
   xlab("")+
-  ggtitle("D. 2019")+
+  ggtitle("L. 2019")+
   theme_classic()+
   theme(axis.title = element_text(size = 16),axis.text = element_text(size = 16),plot.title = element_text(size = 18))
 
 
-figs3 <- plot_grid(p2016,p2017,p2018,p2019,nrow = 2, ncol = 2, align = "hv")
-ggsave(figs3, filename = "./3_Visualization/FigS3.tif",height = 6, width = 9,
-       units = "in", dpi = 300, dev = "tiff")
+# figs3 <- plot_grid(p2016,p2017,p2018,p2019,nrow = 2, ncol = 2, align = "hv")
+# ggsave(figs3, filename = "./3_Visualization/FigS3.tif",height = 6, width = 9,
+#        units = "in", dpi = 300, dev = "tiff")
 
 ###SI fig for wind/rain data
 my.cols <- gg_color_hue(4)
@@ -147,7 +149,7 @@ pp2017 <- ggplot(data = subset(met2, met2$Year == 2017 & met2$Date >= "2017-05-1
   geom_hline(yintercept = 22.1, lty = "dashed")+
   ylab("Precipitation (mm)")+
   xlab("")+
-  ggtitle("C. 2017")+
+  ggtitle("D. 2017")+
   theme_classic()+
   theme(axis.title = element_text(size = 16),axis.text = element_text(size = 16),plot.title = element_text(size = 18))
 pp2017
@@ -157,7 +159,7 @@ pp2018 <- ggplot(data = subset(met2, met2$Year == 2018& met2$Date >= "2018-05-07
   geom_hline(yintercept = 22.1, lty = "dashed")+
   ylab("Precipitation (mm)")+
   xlab("")+
-  ggtitle("E. 2018")+
+  ggtitle("G. 2018")+
   theme_classic()+
   theme(axis.title = element_text(size = 16),axis.text = element_text(size = 16),plot.title = element_text(size = 18))
 pp2018
@@ -168,7 +170,7 @@ pp2019 <- ggplot(data = subset(met2, met2$Year == 2019& met2$Date >= "2019-05-06
   geom_hline(yintercept = 22.1, lty = "dashed")+
   ylab("Precipitation (mm)")+
   xlab("")+
-  ggtitle("G. 2019")+
+  ggtitle("J. 2019")+
   theme_classic()+
   theme(axis.title = element_text(size = 16),axis.text = element_text(size = 16),plot.title = element_text(size = 18))
 pp2019
@@ -190,7 +192,7 @@ pw2017 <- ggplot(data = subset(met2, met2$Year == 2017& met2$Date >= "2017-05-15
   geom_hline(yintercept = 2.7, lty = "dashed")+
   ylab(expression(paste("Daily mean windspeed  ","(",m~s^-1,")")))+
   xlab("")+
-  ggtitle("D. 2017")+
+  ggtitle("E. 2017")+
   theme_classic()+
   theme(axis.title = element_text(size = 14),axis.text = element_text(size = 16),plot.title = element_text(size = 18))
 pw2017
@@ -200,7 +202,7 @@ pw2018 <- ggplot(data = subset(met2, met2$Year == 2018& met2$Date >= "2018-05-07
   geom_hline(yintercept = 2.7, lty = "dashed")+
   ylab(expression(paste("Daily mean windspeed  ","(",m~s^-1,")")))+
   xlab("")+
-  ggtitle("F. 2018")+
+  ggtitle("H. 2018")+
   theme_classic()+
   theme(axis.title = element_text(size = 14),axis.text = element_text(size = 16),plot.title = element_text(size = 18))
 pw2018
@@ -211,13 +213,16 @@ pw2019 <- ggplot(data = subset(met2, met2$Year == 2019 & met2$Date >= "2019-05-0
   geom_hline(yintercept = 2.7, lty = "dashed")+
   ylab(expression(paste("Daily mean windspeed  ","(",m~s^-1,")")))+
   xlab("")+
-  ggtitle("H. 2019")+
+  ggtitle("K. 2019")+
   theme_classic()+
   theme(axis.title = element_text(size = 14),axis.text = element_text(size = 16),plot.title = element_text(size = 18))
 pw2019
 
-figs3 <- plot_grid(pp2016,pw2016,pp2017,pw2017,pp2018,pw2018,pp2019,pw2019,nrow = 4, ncol = 2, align = "hv")
-ggsave(figs3, filename = "./3_Visualization/met_data.tif",height = 12, width = 9,
-       units = "in", dpi = 300, dev = "tiff")
+# figs3 <- plot_grid(pp2016,pw2016,pp2017,pw2017,pp2018,pw2018,pp2019,pw2019,nrow = 4, ncol = 2, align = "hv")
+# ggsave(figs3, filename = "./3_Visualization/met_data.tif",height = 12, width = 9,
+#        units = "in", dpi = 300, dev = "tiff")
 
+fig3_revision <- plot_grid(pp2016,pw2016,p2016, pp2017,pw2017, p2017, pp2018,pw2018,p2018, pp2019,pw2019, p2019, nrow = 4, ncol = 3, align = "hv")
+ggsave(fig3_revision, filename = "./3_Visualization/Fig3_revision.tif",height = 12, width = 13.5,
+       units = "in", dpi = 300, dev = "tiff")
 
