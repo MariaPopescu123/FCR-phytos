@@ -32,13 +32,15 @@ wts <- read_csv("./0_Data_files/WtrTemp_Stability_DO_pH.csv") %>%
                                     ifelse(is.na(CTD_schmidt.stability),YSI_schmidt.stability,CTD_schmidt.stability)),
          n2 = ifelse((is.na(CTD_n2) & is.na(YSI_n2)),SCC_n2,
                                     ifelse(is.na(CTD_n2),YSI_n2,CTD_n2)),
+         lake.number = ifelse((is.na(CTD_lake.number) & is.na(YSI_lake.number)),SCC_lake.number,
+                     ifelse(is.na(CTD_lake.number),YSI_lake.number,CTD_lake.number)),
+         wedderburn.number = ifelse((is.na(CTD_wedderburn.number) & is.na(YSI_wedderburn.number)),SCC_wedderburn.number,
+                     ifelse(is.na(CTD_wedderburn.number),YSI_wedderburn.number,CTD_wedderburn.number)),
          thermo.depth = ifelse((is.na(CTD_thermo.depth) & is.na(YSI_thermo.depth)),SCC_thermo.depth,
                                ifelse(is.na(CTD_thermo.depth),YSI_thermo.depth,CTD_thermo.depth)),
          DO_mgL = ifelse((is.na(CTD_DO_mgL) & is.na(YSI_DO_mgL)),NA,
-                         ifelse(is.na(CTD_DO_mgL),YSI_DO_mgL,CTD_DO_mgL)),
-         pH = ifelse((is.na(CTD_pH) & is.na(YSI_pH)),NA,
-                         ifelse(is.na(CTD_pH),YSI_pH,CTD_pH))) %>%
-  select(Year,Date, Temp_DO_Depth_m,Grab_Temp_Depth_m,Temp_C_grab,Temp_C_Cmax,schmidt.stability,n2, thermo.depth, DO_mgL,pH)
+                         ifelse(is.na(CTD_DO_mgL),YSI_DO_mgL,CTD_DO_mgL))) %>%
+  select(Year,Date, Temp_DO_Depth_m,Grab_Temp_Depth_m,Temp_C_grab,Temp_C_Cmax,schmidt.stability,n2, lake.number, wedderburn.number, thermo.depth, DO_mgL)
 
 
 
@@ -62,9 +64,8 @@ pz.vars <- read_csv("./0_Data_files/pz_WtrTemp_DO_pH.csv") %>%
          pz_Temp_C = ifelse(is.na(CTD_pz_Temp_C)&is.na(YSI_pz_Temp_C),SCC_pz_Temp_C,
                             ifelse(is.na(CTD_pz_Temp_C),YSI_pz_Temp_C,CTD_pz_Temp_C)),
          pz_DO_mgL = ifelse(is.na(CTD_pz_DO_mgL),YSI_pz_DO_mgL,CTD_pz_DO_mgL),
-         pz_pH = ifelse(is.na(CTD_pz_pH),YSI_pz_pH,CTD_pz_pH),
          interp_pz_depth_m = CTD_Interp_pz_depth_m) %>%
-  select(Year, Date, pz_Temp_C, pz_DO_mgL, pz_pH, interp_pz_depth_m)
+  select(Year, Date, pz_Temp_C, pz_DO_mgL, interp_pz_depth_m)
 
 #WRT
 wrt <- read_csv("./0_Data_files/WRT.csv")%>%
@@ -122,8 +123,7 @@ check1 <- mega6 %>%
 bad_dates <- c("2017-06-05","2017-07-24","2017-08-14")
 mega8 <- mega7 %>%
   mutate(Temp_C_Cmax = ifelse(Date %in% bad_dates,NA,Temp_C_Cmax),
-         DO_mgL = ifelse(Date %in% bad_dates,NA,DO_mgL),
-         pH = ifelse(Date %in% bad_dates,NA,pH))
+         DO_mgL = ifelse(Date %in% bad_dates,NA,DO_mgL))
 
 #eliminate phyto vars that won't be included as drivers and limit to date of FP
 #samples
