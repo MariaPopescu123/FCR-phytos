@@ -4,8 +4,6 @@ Folder housing scripts to generate figures associated with the manuscript and su
 
 List of files:
 
-Fig3.R: script to generate Figure 3
-
 Fig4.R: script to generate Figure 4
 
 Fig5.R: script to generate Figure 5
@@ -14,8 +12,10 @@ Fig6.R: script to generate Figure 6
 
 Fig7.R: script to generate Figure 7
 
+FigS3.R: script to generate Figure S3
+
 FigS4.R: script to generate Figure S4
 
-FigS6.R: script to generate Figure S6
+Temp_profile_plots.zip: compressed folders of plots of all water temperature profiles throughout the study period (summers in 2016-2019) with the estimated thermocline depth calculated by rLakeAnalyzer plotted as a horizontal line on each water temperature depth profile
 
-FigS7.R: script to generate Figure S7
+/exploratory visualization/: scripts to generate exploratory visualization plots

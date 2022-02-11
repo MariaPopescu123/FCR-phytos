@@ -27,12 +27,12 @@ mydata <- left_join(my.cs.data,my.fp.data, by = "Date") %>%
 colnames(mydata)
 
 #limit to numeric physicochemical and phyto variables
-vars <- mydata[,c(66,51,50,54,52,53,57,60,59,61,43:48,38,40,42,37,39,41,30:32,34:36,62,63,65,6:14,15:23,3,2,5,4)]
+vars <- mydata[,c(67,51,50,56,52,53,54,55,58,61,60,62,43:48,38,40,42,37,39,41,30:32,34:36,63,64,66,6:14,15:23,3,2,5,4)]
 
-final <- matrix(NA, nrow = length(c(66,51,50,54,52,53,57,60,59,61,43:48,38,40,42,37,39,41,30:32,34:36,62,63,65,6:14,15:23,3,2,5,4)), ncol = 15)
+final <- matrix(NA, nrow = length(c(67,51,50,56,52,53,54,55,58,61,60,62,43:48,38,40,42,37,39,41,30:32,34:36,63,64,66,6:14,15:23,3,2,5,4)), ncol = 15)
 
 #for-loop to run Anderson-Darling tests for manipulation vs. references years on each variable
-for (i in 1:53){
+for (i in 1:55){
 
 my.var <- unlist(vars[i])
 final[i,1] <- colnames(vars)[i]

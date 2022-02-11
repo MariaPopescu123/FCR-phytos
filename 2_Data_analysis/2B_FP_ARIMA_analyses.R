@@ -19,31 +19,28 @@ my.fp.data <- my.fp.data[,c(2,1,3:47)]
 
 mydata <- my.fp.data
 colnames(mydata)
-#peak depth drivers = c(14,16,18,31,37)
-#peak width drivers = c(23,24,25,29,30,34)
-#max biomass drivers = c(7,8,9,28,29,30,36)
 
 #look at correlations - cutoff of 0.7
 
 #for peak depth
-driver_cor <- cor(mydata[,c(40,14,16,18,29,30,31,34)],method = "spearman",use = "pairwise.complete.obs")
+driver_cor <- cor(mydata[,c(41,14,16,18,29:33,35,38)],method = "spearman",use = "pairwise.complete.obs")
 driver_cor[lower.tri(driver_cor)] = ""
 write.csv(driver_cor, file = "./2_Data_analysis/PD_driver_cor.csv", row.names = FALSE)
 #schmidt.stability and n2
 
 mydata1 <- mydata %>%
-  select(Peak_depth_m,schmidt.stability,n2,pz_depth_m,DINmax_depth_m)
+  select(Peak_depth_m,schmidt.stability,n2, Kd, pz_depth_m)
 response_cor <- cor(mydata1,method = "spearman",use = "pairwise.complete.obs")
 response_cor[lower.tri(response_cor)] = ""
 #use schmidt.stability 
 
 
-#for each year
+#for EM years
 d <- mydata %>% filter(Year %in% c(2016:2017))
-driver_cor <- cor(d[,c(40,14,16,18,29,30,31,34)],method = "spearman",use = "pairwise.complete.obs")
+driver_cor <- cor(d[,c(41,14,16,18,29:33,35,38)],method = "spearman",use = "pairwise.complete.obs")
 driver_cor[lower.tri(driver_cor)] = ""
 write.csv(driver_cor, file = "./2_Data_analysis/PD_driver_cor_man.csv", row.names = FALSE)
-#Kd
+#use Kd
 
 mydata1 <- mydata %>%
   filter(Year %in% c(2016:2017)) %>%
@@ -52,7 +49,7 @@ response_cor <- cor(mydata1,method = "spearman",use = "pairwise.complete.obs")
 response_cor[lower.tri(response_cor)] = ""
 
 d <- mydata %>% filter(Year %in% c(2018:2019))
-driver_cor <- cor(d[,c(40,14,16,18,29,30,31,34)],method = "spearman",use = "pairwise.complete.obs")
+driver_cor <- cor(d[,c(41,14,16,18,29:33,35,38)],method = "spearman",use = "pairwise.complete.obs")
 driver_cor[lower.tri(driver_cor)] = ""
 write.csv(driver_cor, file = "./2_Data_analysis/PD_driver_ref.csv", row.names = FALSE)
 #schmidt.stability and n2
@@ -67,13 +64,15 @@ response_cor[lower.tri(response_cor)] = ""
 #use schmidt.stability
 #Kd and thermo.depth better than pz_depth_m
 
-
+#24JAN22: final list of drivers: thermo.depth, schmidt.stability, 
+#lake.number, wedderburn.number, Kd, SRPmax_depth_m, DINmax_depth_m,
+#DOCmax_depth_M
 
 
 
 
 ####for peak width
-driver_cor <- cor(mydata[,c(42,23,24,25,29,30,34)],method = "spearman",use = "pairwise.complete.obs")
+driver_cor <- cor(mydata[,c(43,23:25,29:32,35)],method = "spearman",use = "pairwise.complete.obs")
 driver_cor[lower.tri(driver_cor)] = ""
 write.csv(driver_cor, file = "./2_Data_analysis/PW_driver_cor.csv", row.names = FALSE)
 #schmidt.stability and n2
@@ -86,13 +85,13 @@ response_cor[lower.tri(response_cor)] = ""
 #n2 better 
 
 d <- mydata %>% filter(Year %in% c(2016:2017))
-driver_cor <- cor(d[,c(42,23,24,25,29,30,34)],method = "spearman",use = "pairwise.complete.obs")
+driver_cor <- cor(d[,c(43,23:25,29:32,35)],method = "spearman",use = "pairwise.complete.obs")
 driver_cor[lower.tri(driver_cor)] = ""
 write.csv(driver_cor, file = "./2_Data_analysis/PW_driver_cor_man.csv", row.names = FALSE)
 
 
 d <- mydata %>% filter(Year %in% c(2018:2019))
-driver_cor <- cor(d[,c(42,23,24,25,29,30,34)],method = "spearman",use = "pairwise.complete.obs")
+driver_cor <- cor(d[,c(43,23:25,29:32,35)],method = "spearman",use = "pairwise.complete.obs")
 driver_cor[lower.tri(driver_cor)] = ""
 write.csv(driver_cor, file = "./2_Data_analysis/PW_driver_cor_ref.csv", row.names = FALSE)
 
@@ -107,11 +106,12 @@ response_cor[lower.tri(response_cor)] = ""
 
 #going w/ n2 b/c better for whole time series
 
-
+##24JAN22: final list of drivers for PW: n2, 
+#lake.number, wedderburn.number, Kd, pz_SRP_CV, pz_DIN_CV, pz_DOC_CV
 
 
 ####for max biomass
-driver_cor <- cor(mydata[,c(39,7,8,9,28,29,30,36)],method = "spearman",use = "pairwise.complete.obs")
+driver_cor <- cor(mydata[,c(40,7,8,9,28,29:32,37)],method = "spearman",use = "pairwise.complete.obs")
 driver_cor[lower.tri(driver_cor)] = ""
 write.csv(driver_cor, file = "./2_Data_analysis/MB_driver_cor.csv", row.names = FALSE)
 #schmidt.stability and n2
@@ -124,12 +124,12 @@ response_cor[lower.tri(response_cor)] = ""
 
 
 d <- mydata %>% filter(Year %in% c(2016:2017))
-driver_cor <- cor(d[,c(39,7,8,9,28,29,30,36)],method = "spearman",use = "pairwise.complete.obs")
+driver_cor <- cor(d[,c(40,7,8,9,28,29:32,37)],method = "spearman",use = "pairwise.complete.obs")
 driver_cor[lower.tri(driver_cor)] = ""
 write.csv(driver_cor, file = "./2_Data_analysis/MB_driver_cor_man.csv", row.names = FALSE)
 
 d <- mydata %>% filter(Year %in% c(2018:2019))
-driver_cor <- cor(d[,c(39,7,8,9,28,29,30,36)],method = "spearman",use = "pairwise.complete.obs")
+driver_cor <- cor(d[,c(40,7,8,9,28,29:32,37)],method = "spearman",use = "pairwise.complete.obs")
 driver_cor[lower.tri(driver_cor)] = ""
 write.csv(driver_cor, file = "./2_Data_analysis/MB_driver_cor_ref.csv", row.names = FALSE)
 
@@ -145,23 +145,33 @@ response_cor[lower.tri(response_cor)] = ""
 #use Temp_C_Cmax
 #schmidt.stability and n2 about the same so going w/ n2 based on whole timeseries
 
+#24JAN22: final list of drivers for MB: Temp_C_Cmax, n2, lake.number, 
+#wedderburn.number, perc_light_Cmax, Cmax_SRP_ugL, Cmax_DIN_ugL 
 
 
 
 colnames(mydata)
 #subset to drivers and responses
-#peak depth: get rid of n2
-#peak width: get rid of schmidt.stability
-#max biomass: get rid of Cmax_DOC_mgL and schmidt.stability
-#peak depth drivers = c(14,16,18,29,30,31,34)
-#peak width drivers = c(23,24,25,29,30,34)
-#max biomass drivers = c(7,8,28,29,30,36)
-mydata2 <- mydata[,c(1,40,42,39,14,16,18,29,30,31,34,23,24,25,7,8,28,36)]
+
+#24JAN22: final list of drivers for PD: thermo.depth, schmidt.stability, 
+#lake.number, wedderburn.number, Kd, SRPmax_depth_m, DINmax_depth_m,
+#DOCmax_depth_m
+colnames(mydata[,c(41,14,16,18,29,31,32,33,35)])
+
+#24JAN22: final list of drivers for PW: n2, 
+#lake.number, wedderburn.number, Kd, pz_SRP_CV, pz_DIN_CV, pz_DOC_CV
+colnames(mydata[,c(43,23:25,30:32,35)])
+
+#24JAN22: final list of drivers for MB: Temp_C_Cmax, n2, lake.number, 
+#wedderburn.number, perc_light_Cmax, Cmax_SRP_ugL, Cmax_DIN_ugL
+colnames(mydata[,c(40,7,8,28,30:32,37)])
+
+mydata2 <- mydata[,c(1,41,43,40,14,16,18,29,31,32,33,35,23,24,25,30,7,8,28,37)]
 
 #check for skewness in drivers and responses and whether logging improves it
 #ideally we want skewness to approach 0
 
-for (i in 2:18){
+for (i in 2:20){
   print(colnames(mydata2)[i])
   var <- mydata2[,i]
   hist(as.matrix(var), main = colnames(mydata2)[i])
@@ -175,6 +185,8 @@ for (i in 2:18){
 #Max_biomass_ugL 
 #SRPmax_depth_m 
 #DOCmax_depth_m 
+#lake.number
+#wedderburn.number
 #thermo.depth
 #pz_depth_m
 #pz_DIN_CV
@@ -190,7 +202,9 @@ mydata3 <- mydata2 %>%
          Max_biomass_ugL = log(Max_biomass_ugL),
          pz_DIN_CV = log(pz_DIN_CV),
          perc_light_Cmax = log(perc_light_Cmax),
-         thermo.depth = log(thermo.depth)
+         thermo.depth = log(thermo.depth),
+         lake.number = log(lake.number),
+         wedderburn.number = log(wedderburn.number)
          )
 
 #scale predictor/response variables to allow comparison of coefficients in model
@@ -198,10 +212,10 @@ mydata4 <- mydata3 %>%
   mutate_at(vars(-Date),scale) 
 
 # ##check skewness for EM years
-d <- mydata[,c(1,2,40,42,39,14,16,18,29,30,31,34,23,24,25,7,8,28,36)] %>%
+d <- mydata[,c(1,2,41,43,40,14,16,18,29,31,32,33,35,23,24,25,30,7,8,28,37)] %>%
   filter(Year %in% c(2016:2017)) %>%
   select(-Year)
-for (i in 2:18){
+for (i in 2:20){
   print(colnames(d)[i])
   var <- d[,i]
   hist(as.matrix(var), main = colnames(d)[i])
@@ -213,6 +227,8 @@ for (i in 2:18){
 #should log:
 #Max_biomass_ugL
 #DOCmax_depth_m
+#lake.number
+#wedderburn.number
 #pz_depth_m
 #pz_DIN_CV
 #pz_DOC_CV
@@ -226,7 +242,9 @@ d1 <- d %>%
          pz_DIN_CV = log(pz_DIN_CV),
          pz_DOC_CV = log(pz_DOC_CV),
          DOCmax_depth_m = log(DOCmax_depth_m),
-         perc_light_Cmax = log(perc_light_Cmax)
+         perc_light_Cmax = log(perc_light_Cmax),
+         lake.number = log(lake.number),
+         wedderburn.number = log(wedderburn.number)
   )
 
 #scale predictor/response variables to allow comparison of coefficients in model
@@ -235,10 +253,10 @@ dEM <- d1 %>%
 
 
 ##non-EM years
-d <- mydata[,c(1,2,40,42,39,14,16,18,29,30,31,34,23,24,25,7,8,28,36)] %>%
+d <- mydata[,c(1,2,41,43,40,14,16,18,29,31,32,33,35,23,24,25,30,7,8,28,37)] %>%
   filter(Year %in% c(2018:2019)) %>%
   select(-Year)
-for (i in 2:18){
+for (i in 2:20){
   print(colnames(d)[i])
   var <- d[,i]
   hist(as.matrix(var), main = colnames(d)[i])
@@ -251,6 +269,8 @@ for (i in 2:18){
 #Max_biomass_ugL
 #DINmax_depth_m
 #DOCmax_depth_m
+#lake.number
+#wedderburn.number
 #thermo.depth
 #Cmax_DIN_ugL
 #perc_light_Cmax
@@ -261,7 +281,9 @@ d1 <- d %>%
          DINmax_depth_m = log(DINmax_depth_m),
          thermo.depth = log(thermo.depth),
          Cmax_DIN_ugL = log(Cmax_DIN_ugL),
-         perc_light_Cmax = log(perc_light_Cmax))
+         perc_light_Cmax = log(perc_light_Cmax),
+         lake.number = log(lake.number),
+         wedderburn.number = log(wedderburn.number))
 
 #scale predictor/response variables to allow comparison of coefficients in model
 dnoEM <- d1 %>%
@@ -271,13 +293,14 @@ dnoEM <- d1 %>%
 
 #find best-fit ARIMA model for peak depth
 #subset to drivers and responses
-#peak depth drivers = c(10,14,31)
-#peak width drivers = c(19,20,24,28)
-#max biomass drivers = c(8,22)
+#24JAN22: final list of drivers for PD: thermo.depth, schmidt.stability, 
+#lake.number, wedderburn.number, Kd, SRPmax_depth_m, DINmax_depth_m,
+#DOCmax_depth_m
+
 colnames(mydata4)
 
-
-cols <- c(5:8,10:11)
+colnames(mydata4[,c(5:7,8:12)])
+cols <- c(5:7,8:12)
 sub.final <- NULL
 final <- NULL
 
@@ -331,8 +354,8 @@ final <- distinct(final)
 best <- final %>%
   slice(which.min(AICc))
 
-best.vars <- colnames(mydata4)[combn(cols,5)[,1]]
-best.vars.cols <- combn(cols,5)[,1]
+best.vars <- colnames(mydata4)[combn(cols,7)[,5]]
+best.vars.cols <- combn(cols,7)[,5]
 
 best.fit <- auto.arima(y,xreg = as.matrix(mydata4[,best.vars.cols]),max.p = 1, max.P = 1)
 best.fit
@@ -364,10 +387,12 @@ for (i in 1:nrow(good)){
 }
 
 #find best-fit ARIMA model for peak width
-#peak width drivers = c(16:21,23:24,28,36)
+#24JAN22: final list of drivers for PW: n2, 
+#lake.number, wedderburn.number, Kd, pz_SRP_CV, pz_DIN_CV, pz_DOC_CV
+
 colnames(mydata4)
 
-cols <- c(9,11:14)
+cols <- c(9,10,16,12,13:15)
 sub.final <- NULL
 final <- NULL
 
@@ -420,8 +445,8 @@ final <- distinct(final)
 
 best <- final %>%
   slice(which.min(AICc))
-best.vars <- colnames(mydata4)[combn(cols,3)[,3]]
-best.vars.cols <- combn(cols,3)[,3]
+best.vars <- colnames(mydata4)[combn(cols,3)[,28]]
+best.vars.cols <- combn(cols,3)[,28]
 
 best.fit <- auto.arima(y,xreg = as.matrix(mydata4[,best.vars.cols]),max.p = 1, max.P = 1)
 best.fit
@@ -456,9 +481,12 @@ print(accuracy(good.fit.1))
 }
 
 #find best-fit ARIMA model for max_biomass
+#24JAN22: final list of drivers for MB: Temp_C_Cmax, n2, lake.number, 
+#wedderburn.number, perc_light_Cmax, Cmax_SRP_ugL, Cmax_DIN_ugL
+
 colnames(mydata4)
 
-cols <- c(9,15:18)
+cols <- c(19,16,9,10,20,17,18)
 sub.final <- NULL
 final <- NULL
 
@@ -511,9 +539,9 @@ final <- distinct(final)
 
 best <- final %>%
   slice(which.min(AICc))
-best.vars <- colnames(mydata4)[combn(cols,3)[,9]]
+best.vars <- colnames(mydata4)[combn(cols,4)[,14]]
 best.vars
-best.vars.cols <- combn(cols,3)[,9]
+best.vars.cols <- combn(cols,4)[,14]
 
 best.fit <- auto.arima(y,xreg = as.matrix(mydata4[,best.vars.cols]),max.p = 1, max.P = 1)
 best.fit
@@ -560,12 +588,12 @@ for(k in 1:length(years)){
   if(years[k] == "EM"){
     y <- dEM[,2]
     x <- dEM
-    cols <- c(5:8,10:11)
+    cols <- c(5:7,8:12)
     }
   if(years[k] == "noEM"){
     y <- dnoEM[,2]
     x <- dnoEM
-    cols <- c(5:8,10:11)
+    cols <- c(5:7,8:12)
     }
   
 
@@ -631,12 +659,12 @@ for (i in 1:nrow(best)){
   if(years[i] == "EM"){
     y <- dEM[,2]
     x <- dEM
-    cols <- c(5:8,10:11)
+    cols <- c(5:7,8:12)
   }
   if(years[i] == "noEM"){
     y <- dnoEM[,2]
     x <- dnoEM
-    cols <- c(5:8,10:11)
+    cols <- c(5:7,8:12)
   }
   
   best.vars <- colnames(x)[combn(cols,unlist(best[i,3]))[,unlist(best[i,4])]]
@@ -651,7 +679,8 @@ for (i in 1:nrow(best)){
     filter(Year == years[i]) %>%
     filter(AICc > as.numeric(best$AICc[i]) & AICc <= (as.numeric(best$AICc[i]) + 2)) %>%
     mutate(Num.covars = as.numeric(Num.covars),
-           Covar.cols = as.numeric(Covar.cols))
+           Covar.cols = as.numeric(Covar.cols)) %>%
+    arrange(AICc)
   print(good)
   
   if(nrow(good)>0){
@@ -690,12 +719,12 @@ for(k in 1:length(years)){
   if(years[k] == "EM"){
     y <- dEM[,3]
     x <- dEM
-    cols <- c(9,11:14)
+    cols <- c(9,10,16,12,13:15)
   }
   if(years[k] == "noEM"){
     y <- dnoEM[,3]
     x <- dnoEM
-    cols <- c(9,11:14)
+    cols <- c(9,10,16,12,13:15)
   }
   
   
@@ -755,7 +784,7 @@ best <- final %>%
   group_by(Year) %>%
   slice(which.min(AICc)) %>%
   mutate(Num.covars = as.numeric(Num.covars),
-         Covar.cols = as.numeric(Covar.cols))
+         Covar.cols = as.numeric(Covar.cols)) 
 
 
 for (i in 1:nrow(best)){
@@ -763,12 +792,12 @@ for (i in 1:nrow(best)){
   if(years[i] == "EM"){
     y <- dEM[,3]
     x <- dEM
-    cols <- c(9,11:14)
+    cols <- c(9,10,16,12,13:15)
   }
   if(years[i] == "noEM"){
     y <- dnoEM[,3]
     x <- dnoEM
-    cols <- c(9,11:14)
+    cols <- c(9,10,16,12,13:15)
   }
   
   best.vars <- colnames(x)[combn(cols,unlist(best[i,3]))[,unlist(best[i,4])]]
@@ -783,7 +812,8 @@ for (i in 1:nrow(best)){
     filter(Year == years[i]) %>%
     filter(AICc > as.numeric(best$AICc[i]) & AICc <= (as.numeric(best$AICc[i]) + 2)) %>%
     mutate(Num.covars = as.numeric(Num.covars),
-           Covar.cols = as.numeric(Covar.cols))
+           Covar.cols = as.numeric(Covar.cols)) %>%
+    arrange(AICc)
   print(good)
   
   if(nrow(good)>0){
@@ -823,12 +853,12 @@ for(k in 1:length(years)){
   if(years[k] == "EM"){
     y <- dEM[,4]
     x <- dEM
-    cols <- c(9,15:18)
+    cols <- c(19,16,9,10,20,17,18)
   }
   if(years[k] == "noEM"){
     y <- dnoEM[,4]
     x <- dnoEM
-    cols <- c(9,15:18)
+    cols <- c(19,16,9,10,20,17,18)
   }
   
   
@@ -895,12 +925,12 @@ for (i in 1:nrow(best)){
   if(years[i] == "EM"){
     y <- dEM[,4]
     x <- dEM
-    cols <- c(9,15:18)
+    cols <- c(19,16,9,10,20,17,18)
   }
   if(years[i] == "noEM"){
     y <- dnoEM[,4]
     x <- dnoEM
-    cols <- c(9,15:18)
+    cols <- c(19,16,9,10,20,17,18)
   }
   
   best.vars <- colnames(x)[combn(cols,unlist(best[i,3]))[,unlist(best[i,4])]]
@@ -915,7 +945,8 @@ for (i in 1:nrow(best)){
     filter(Year == years[i]) %>%
     filter(AICc > as.numeric(best$AICc[i]) & AICc <= (as.numeric(best$AICc[i]) + 2)) %>%
     mutate(Num.covars = as.numeric(Num.covars),
-           Covar.cols = as.numeric(Covar.cols))
+           Covar.cols = as.numeric(Covar.cols)) %>%
+    arrange(AICc)
   print(good)
   
   if(nrow(good)>0){

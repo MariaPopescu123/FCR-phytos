@@ -38,7 +38,7 @@ my.cs.data <- read_csv("./2_Data_analysis/CS_megamatrix.csv") %>%
   filter(!is.na(BV_TOTAL)) 
 
 colnames(my.cs.data)
-env <- my.cs.data[,c(2,5:6,11:13,27,29:30,38,39:40,42)]
+env <- my.cs.data[,c(2,5:6,11:13,27,29:32,39,40:41,43)]
 env$Month <- month(my.cs.data$Date)
 env <- data.frame(scale(env, center = TRUE, scale = TRUE)) 
 
@@ -109,7 +109,7 @@ eu.sel <- subset(Y.sel, row.names(Y.sel) %in% eugleno)
 ra.sel <- subset(Y.sel, row.names(Y.sel) %in% raphid)
 
 #make plot
-tiff(filename = "./3_Visualization/Fig5.tif",width = 6.5,height = 9.75,units = "in",res = 300)
+tiff(filename = "./3_Visualization/Fig7.tif",width = 6.5,height = 9.75,units = "in",res = 300)
 par(mfrow = c(3,2),mar = c(3,3,1.5,0),mgp = c(1.5,0.5,0))
 
 plot(Q, display=c('sites','species'),choices=c(1,2), type='n')
@@ -137,8 +137,8 @@ text(de.sel[,1], de.sel[,2], substr(rownames(de.sel),1,3), col="chartreuse3", ce
 text(cr.sel[,1], cr.sel[,2], substr(rownames(cr.sel),1,3), col="chocolate1", cex = 0.8)
 text(eu.sel[,1], eu.sel[,2], substr(rownames(eu.sel),1,3), col="gray48", cex = 0.8)
 legend("topright",legend = c("k = 0.11"),bty = "n")
-legend("bottomleft",legend = c("Cyano","Chloro","Baci","Chryso","Dino","Desmid","Crypto","Eugleno","Raphid"),
-       pch = 15, pt.cex = 2,col = c("cadetblue3","darkgreen","burlywood3","darkgoldenrod2","brown1","chartreuse3","chocolate1","gray48","gray8"),
+legend("bottomleft",legend = c("Bacillaria","Chrysophytes","Chlorophytes","Cryptophytes","Cyanobacteria","Desmids","Dinoflagellates","Euglenoids","Raphids"),
+       pch = 15, pt.cex = 2,col = c("burlywood3","darkgoldenrod2","darkgreen","chocolate1","cadetblue3","chartreuse3","brown1","gray48","gray8"),
        bty = "n")
 
 plot(Q, display=c('sites','species'),choices=c(1,3), type='n')

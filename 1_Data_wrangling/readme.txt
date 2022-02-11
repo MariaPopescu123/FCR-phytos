@@ -20,7 +20,9 @@ List of files:
 
 1H_Biodiversity_indices.R: script to format published phytoplankton biovolume data and calculate biodiversity indices for analysis                     
 
-1I_Community_structure.R: script to format published phytoplankton biovolume data and calculate community structure indices for analysis                      
+1I_Community_structure.R: script to format published phytoplankton biovolume data and calculate community structure indices for analysis  
+
+1K_WRT.R: script to calculate water residence time                    
 
 1J_Megamatrix.R: script to collate all physicochemical and phytoplankton variables into a single matrix                               
 

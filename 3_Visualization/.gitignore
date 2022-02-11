@@ -3,12 +3,11 @@
 # Except this file
 !/.gitignore
 !readme.txt
-!/Fig3.R
 !/Fig4.R
 !/Fig5.R
 !/Fig6.R
 !/Fig7.R
+!/FigS3.R
 !/FigS4.R
-!/FigS6.R
-!/FigS7.R
 !/exploratory_visualization/
+!/Temp_profile_plots.zip

@@ -10,10 +10,5 @@ List of files:
 
 2C_NMDS.R: script to conduct non-parametric multidimensional scaling analysis (NMDS) on phytoplankton biovolume data                             
 
-2D_natural_storms.R: script to identify naturally-occurring intense storms that occur during the study period                   
+2D_natural_storms.R: script to identify naturally-occurring intense storms that occur during the study period; also generates Fig. 3 in manuscript                  
 
-Table_S4.R: script to generate Table S4
-
-Table_S5.R: script to generate Table S5
-
-Table_S7.R: script to generate Table S7
