@@ -155,7 +155,7 @@ plot(en12_notEM, col = "gray48")
 plot(en12_EM, col = "black")
 legend("bottomleft",legend = c("2016","2017","2018","2019"), pch = c(10,8,23,25), pt.bg = c(NA,NA,"black","black"), bty = "n", pt.cex = 2)
 #legend(x = -2, y = -0.2,legend = c("May","June","July","August","September"), pch = 22, pt.bg = my.cols, bty = "n", pt.cex = 2)
-legend("topright",legend = c("k = 0.11"),bty = "n")
+legend("topright",legend = c("stress = 0.11"),bty = "n")
 title("A. all summers",adj = 0, line = 0.5)
 
 plot(Q, display=c('sites'),choices=c(1,3), type='n')
@@ -194,7 +194,7 @@ text(1, 0.45, "WN",col = "gray48")
 legend("bottomleft",legend = c("2016","2017","2018","2019"), pch = c(10,8,23,25), pt.bg = c(NA,NA,"black","black"), bty = "n", pt.cex = 2)
 #legend("bottomleft",legend = c("2016 (EM)","2017 (EM)","2018 (no EM)","2019 (no EM)"), pch = c(10,8,23,25), pt.bg = c(NA,NA,"black","black"), bty = "n", pt.cex = 2)
 #legend("bottomright",legend = c("May","June","July","August","September"), pch = 22, pt.bg = my.cols, bty = "n", pt.cex = 2)
-legend("topright",legend = c("k = 0.11"),bty = "n")
+legend("topright",legend = c("stress = 0.11"),bty = "n")
 title("B. all summers",adj = 0, line = 0.5)
 
 #read in environmental data
@@ -283,7 +283,7 @@ points(Q$points[p2016.data$Month==9 & p2016.data$EM3 == 3,1], Q$points[p2016.dat
 
 legend("bottomleft",legend = c("pre-EM","post-EM 1","post-EM 2","post-EM 3"), pch = c(1,10,13,19), bty = "n", pt.cex = 2)
 #legend("bottomright",legend = c("May","June","July","August","September"), pch = 22, pt.bg = my.cols, bty = "n", pt.cex = 2)
-legend("topright",legend = c("k = 0.13"),bty = "n")
+legend("topright",legend = c("stress = 0.13"),bty = "n")
 
 #### 2017 ####
 
@@ -335,7 +335,7 @@ points(Q$points[p2017.data$Month==9 & p2017.data$EM3 == 2,1], Q$points[p2017.dat
 
 legend("bottomleft",legend = c("pre-EM","post-EM 1","post-EM 2"), pch = c(1,10,13), bty = "n", pt.cex = 2)
 #legend("bottomright",legend = c("May","June","July","August","September"), pch = 22, pt.bg = my.cols, bty = "n", pt.cex = 2)
-legend("topright",legend = c("k = 0.08"),bty = "n")
+legend("topright",legend = c("stress = 0.08"),bty = "n")
 
 #### 2018 ####
 
@@ -382,7 +382,7 @@ points(Q$points[p2018.data$Month==9 ,1], Q$points[p2018.data$Month==9 ,2], pch=1
 
 
 legend("bottomleft",legend = c("May","June","July","August","September"), pch = 22, pt.bg = my.cols, bty = "n", pt.cex = 2)
-legend("topright",legend = c("k = 0.12"),bty = "n")
+legend("topright",legend = c("stress = 0.12"),bty = "n")
 
 
 
@@ -433,7 +433,7 @@ points(Q$points[p2019.data$Month==9 ,1], Q$points[p2019.data$Month==9 ,2], pch=8
 
 #legend("bottomright",legend = c("May","June","July","August","September"), pch = 22, pt.bg = my.cols, bty = "n", pt.cex = 2)
 legend("bottomleft",legend = c("pre-storm","post-storm"), pch = c(3,8), bty = "n", pt.cex = 2)
-legend("topright",legend = c("k = 0.04"),bty = "n")
+legend("topright",legend = c("stress = 0.04"),bty = "n")
 
 dev.off()
 

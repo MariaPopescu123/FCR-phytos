@@ -272,3 +272,5 @@ plot<-plot_grid(p1,p3,p2,p4, align='v', vjust=1, scale = 1,
 ggsave(plot, filename = "./3_Visualization/Fig_phyto_timeseries.tif",height = 9, width = 10,
        units = "in", dpi = 300, dev = "tiff")
 
+##How often did each scenario correctly predict the dominant group?
+

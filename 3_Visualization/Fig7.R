@@ -136,7 +136,7 @@ text(di.sel[,1], di.sel[,2], substr(rownames(di.sel),1,3), col="brown1", cex = 0
 text(de.sel[,1], de.sel[,2], substr(rownames(de.sel),1,3), col="chartreuse3", cex = 0.8)
 text(cr.sel[,1], cr.sel[,2], substr(rownames(cr.sel),1,3), col="chocolate1", cex = 0.8)
 text(eu.sel[,1], eu.sel[,2], substr(rownames(eu.sel),1,3), col="gray48", cex = 0.8)
-legend("topright",legend = c("k = 0.11"),bty = "n")
+legend("topright",legend = c("stress = 0.11"),bty = "n")
 legend("bottomleft",legend = c("Bacillaria","Chrysophytes","Chlorophytes","Cryptophytes","Cyanobacteria","Desmids","Dinoflagellates","Euglenoids","Raphids"),
        pch = 15, pt.cex = 2,col = c("burlywood3","darkgoldenrod2","darkgreen","chocolate1","cadetblue3","chartreuse3","brown1","gray48","gray8"),
        bty = "n")
@@ -164,7 +164,7 @@ text(di.sel[,1], di.sel[,3], substr(rownames(di.sel),1,3), col="brown1", cex = 0
 text(de.sel[,1], de.sel[,3], substr(rownames(de.sel),1,3), col="chartreuse3", cex = 0.8)
 text(cr.sel[,1], cr.sel[,3], substr(rownames(cr.sel),1,3), col="chocolate1", cex = 0.8)
 text(eu.sel[,1], eu.sel[,3], substr(rownames(eu.sel),1,3), col="gray48", cex = 0.8)
-legend("topright",legend = c("k = 0.11"),bty = "n")
+legend("topright",legend = c("stress = 0.11"),bty = "n")
 
 
 #### NMDS FOR 2016 ONLY ####
@@ -246,7 +246,7 @@ points(ra[,1], ra[,2],  col="gray8", pch = "+")
 plot(en_16, col = "black")
 text(cy.sel[,1], cy.sel[,2], substr(rownames(cy.sel),1,3), col="cadetblue3", cex = 0.8)
 text(chl.sel[,1], chl.sel[,2], substr(rownames(chl.sel),1,3), col="darkgreen", cex = 0.8)
-legend("topright",legend = c("k = 0.13"),bty = "n")
+legend("topright",legend = c("stress = 0.13"),bty = "n")
 
 
 
@@ -330,7 +330,7 @@ plot(en_17, col = "black")
 text(cy.sel[,1], cy.sel[,2], substr(rownames(cy.sel),1,3), col="cadetblue3", cex = 0.8)
 text(chl.sel[,1], chl.sel[,2], substr(rownames(chl.sel),1,3), col="darkgreen", cex = 0.8)
 text(ba.sel[,1], ba.sel[,2], substr(rownames(ba.sel),1,3), col="burlywood3", cex = 0.8)
-legend("topright",legend = c("k = 0.08"),bty = "n")
+legend("topright",legend = c("stress = 0.08"),bty = "n")
 #### 2018 ####
 
 #subset just 2018 data
@@ -406,7 +406,7 @@ points(eu[,1], eu[,2],  col="gray48", pch = "+")
 points(ra[,1], ra[,2],  col="gray8", pch = "+")
 plot(en_18, col = "black")
 text(ba.sel[,1], ba.sel[,2], substr(rownames(ba.sel),1,3), col="burlywood3", cex = 0.8)
-legend("topright",legend = c("k = 0.12"),bty = "n")
+legend("topright",legend = c("stress = 0.12"),bty = "n")
 
 
 
@@ -487,7 +487,7 @@ points(ra[,1], ra[,2],  col="gray8", pch = "+")
 plot(en_19, col = "black")
 text(cy.sel[,1], cy.sel[,2], substr(rownames(cy.sel),1,3), col="cadetblue3", cex = 0.8)
 text(ba.sel[,1], ba.sel[,2], substr(rownames(ba.sel),1,3), col="burlywood3", cex = 0.8)
-legend("topright",legend = c("k = 0.04"),bty = "n")
+legend("topright",legend = c("stress = 0.04"),bty = "n")
 
 
 dev.off()
