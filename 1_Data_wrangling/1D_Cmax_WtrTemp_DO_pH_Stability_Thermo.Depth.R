@@ -11,7 +11,7 @@ pacman::p_load(tidyverse, lubridate, rLakeAnalyzer, data.table)
 rm(list=ls())
 
 #read in sample dates and depths of phyto samples
-sample_info <- read_csv("./0_Data_files/phytoplankton.csv") %>%
+sample_info <- read.csv("./0_Data_files/phytoplankton.csv") %>%
   select(Date, Depth_m) %>%
   distinct()
 sample_info$number <- 1:100
@@ -19,7 +19,7 @@ sample_info$number <- 1:100
 #read in FP data so can match temp profiles to hour FP profiles were taken
 replacement_dates <- as.Date(c("2016-07-12","2018-05-24","2019-07-03","2019-07-11","2019-07-18","2019-10-22"))
 
-fp_sample <- read_csv("./0_Data_files/FP.csv")%>%
+fp_sample <- read.csv("./0_Data_files/FP.csv")%>%
   mutate(Date = date(DateTime),
          Hour = hour(DateTime)) %>%
   filter(Reservoir == "FCR" & Site == 50) %>%
@@ -62,7 +62,7 @@ fp_sample <- fp_sample[-81,]
 
 #read in met data for lake number and Wedderburn number
 #read in and wrangle data
-met <- fread("./0_Data_files/Met_final_2015_2020.csv", fill = TRUE, blank.lines.skip = FALSE,select = c("DateTime",
+met <- fread("./0_Data_files/met.csv", fill = TRUE, blank.lines.skip = FALSE,select = c("DateTime",
                                                                                                         "Rain_Total_mm",                                                        
                                                                                                         "WindSpeed_Average_m_s",
                                                                                                         "Flag_Rain_Total_mm",
@@ -373,6 +373,7 @@ ts.wedderburn.number <- function(wtr, wnd, wnd.height, bathy, Ao, seasonal=TRUE)
   return(output)
 }
 
+
 wn_ctd <- ts.wedderburn.number(wtr = wtr_ctd, wnd = wnd_ctd, wnd.height = 3, bathy = bathy, Ao = 119000, seasonal = TRUE) 
 
 wn_ctd1 <- wn_ctd %>%
@@ -405,6 +406,7 @@ for (i in 1:length(ctd_dates)){
   ctd_profile <- ctd_sample[ctd_sample[, "Hour"] == closest(ctd_sample$Hour,fp_hour$Hour[1]),]
   final <- bind_rows(final, ctd_profile)
 }
+
 
 final <- final %>%
   select(Date, Depth_m, Temp_C, DO_mgL, pH)
@@ -453,6 +455,9 @@ for (i in 1:length(grab_dates)){
   
 }
 colnames(df.final.grab) <-c("Date","Grab_T_Depth_m","Grab_Depth_Temp_C")
+
+sample_info$Date <- as.Date(sample_info$Date)
+
 
 check <- left_join(df.final.grab,sample_info,by = "Date")
 
@@ -677,6 +682,9 @@ for (i in 1:length(grab_dates)){
 
 colnames(df.final.grab) <-c("Date","Grab_T_Depth_m","Grab_Depth_Temp_C")
 
+sample_info$Date <- as.Date(sample_info$Date, format = "%Y-%m-%d")
+
+
 check <- left_join(df.final.grab,sample_info,by = "Date")
 
 colnames(ss_ysi)[1] <- "Date"
@@ -899,6 +907,7 @@ scc_profiles <- wtr_scc %>%
   mutate(depth = fun1(strsplit(depth, split = "_"),2)) %>%
   arrange(datetime, depth)
 
+####here is where the error begins 
 td.data <- Tmetrics4 %>%
   mutate(thermo.depth = ifelse((is.na(CTD_thermo.depth) & is.na(YSI_thermo.depth)),SCC_thermo.depth,
                                ifelse(is.na(CTD_thermo.depth),YSI_thermo.depth,CTD_thermo.depth)),
@@ -909,6 +918,7 @@ td.data <- Tmetrics4 %>%
   select(Date, thermo.depth, sensor) %>%
   filter(complete.cases(.))
 
+#error here
 for(i in 1:length(td.data$Date)){
   if(td.data[i,"sensor"] == "CTD"){
     temp_profile <- ctd_profiles %>%
@@ -935,10 +945,11 @@ for(i in 1:length(td.data$Date)){
     geom_hline(yintercept = td.data[i,2], color = "red")+
     theme_classic()
   
-  my.filename = paste0("C:/Users/Mary Lofton/Dropbox/Ch_2/FWB_revision_files/Temp_profile_plots/",temp_profile$datetime[1],".png")
+  my.filename = paste0("C:/Users/mariapopescu100/Documents/FCR-phytos",temp_profile$datetime[1],".png")
   ppi = 300
   png(file = my.filename, width = 3*ppi, height = 3*ppi, res = ppi)
   print(p1)
   dev.off()
 }
+
 

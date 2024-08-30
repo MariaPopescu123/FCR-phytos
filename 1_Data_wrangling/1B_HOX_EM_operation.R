@@ -57,7 +57,7 @@ EM_dates <- as.Date(c("2016-05-30", "2016-06-06","2016-06-13","2016-06-27",
 
               
 #get sampling dates and add columns for HOx/EM operation
-hoxem <- read_csv("./0_Data_files/EDI_phytos/phytoplankton.csv") %>%
+hoxem <- read_csv("./0_Data_files/phytoplankton.csv") %>%
   select(Date) %>%
   distinct() %>%
   add_column(HOx = 0) %>%
@@ -109,3 +109,4 @@ ggplot(data = hoxem, aes(x = Date, y = EM))+
   facet_wrap(vars(Year), scales = "free")+
   geom_line(size = 1)+
   theme_classic()
+

@@ -29,6 +29,8 @@ destination <- "./0_Data_files"
 
 download.file(data,destfile = "./0_Data_files/SCC.csv", method='libcurl')
 
+options(timeout = 300)  # Increase timeout to 300 seconds
+
 #download met station data from EDI
 data  <- "https://portal.edirepository.org/nis/dataviewer?packageid=edi.389.5&entityid=3d1866fecfb8e17dc902c76436239431"
 destination <- "./0_Data_files"

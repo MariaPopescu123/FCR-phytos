@@ -9,12 +9,12 @@
 
 #load packages
 #install.packages('pacman')
-pacman::p_load(tidyverse, lubridate, data.table)
+pacman::p_load(tidyverse, lubridate, data.table, readr)
 rm(list=ls())
 
 
 #read in sample dates and depths of phyto samples
-sample_info <- read_csv("./0_Data_files/EDI_phytos/phytoplankton.csv") %>%
+sample_info <- read_csv("./0_Data_files/phytoplankton.csv") %>%
   select(Date, Depth_m) %>%
   distinct()
 sample_info$number <- 1:100
@@ -22,7 +22,7 @@ sample_info$number <- 1:100
 #read in FP data so can match temp profiles to hour FP profiles were taken
 replacement_dates <- as.Date(c("2016-07-12","2018-05-24","2019-07-03","2019-07-11","2019-07-18","2019-10-22"))
 
-fp_sample <- read_csv("./0_Data_files/FP.csv")%>%
+fp_sample <- read.csv("./0_Data_files/FP.csv")%>%
   mutate(Date = date(DateTime),
          Hour = hour(DateTime)) %>%
   filter(Reservoir == "FCR" & Site == 50) %>%
@@ -108,7 +108,7 @@ ctd_par <- final %>%
 #only calculating Kd for now because don't have incident light for most profiles
 
 #read in data to pull thermocline depth
-wts <- read_csv("./0_Data_files/WtrTemp_Stability.csv") %>%
+wts <- read_csv("./0_Data_files/WtrTemp_Stability_DO_pH.csv") %>%
   mutate(Year = year(Date)) %>%
   mutate(Temp_Depth_m = ifelse((is.na(CTD_Depth_m) & is.na(YSI_Depth_m)),SCC_Depth_m,
                                ifelse((is.na(CTD_Depth_m)),YSI_Depth_m,CTD_Depth_m)),

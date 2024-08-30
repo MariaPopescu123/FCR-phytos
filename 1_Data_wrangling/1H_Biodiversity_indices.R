@@ -14,7 +14,7 @@ pacman::p_load(tidyverse, lubridate, rLakeAnalyzer, vegan)
 rm(list=ls())
 
 #data wrangling to get input matrix for vegan functions
-phytos <- read_csv("./0_Data_files/EDI_phytos/phytoplankton.csv") %>%
+phytos <- read_csv("./0_Data_files/phytoplankton.csv") %>%
   select(Date, Genus, BV_um3mL) %>%
   spread(key = Genus, value = BV_um3mL)
 
@@ -116,7 +116,7 @@ bd1 <- bd %>%
 yrs <- unique(bd1$Year)
 bd_metrics <- unique(bd1$bd_metric)
 
-png(file = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/BD_pacf.png",width = 16, height = 16,
+png(file = "C:/Users/mariapopescu100/Documents/FCR-phytos/BD_pacf.png",width = 16, height = 16,
     units = "cm",res = 300)
 par(mfrow = c(4,4), mgp = c(2,0.5,0),mar = c(4,3,3,1))
 

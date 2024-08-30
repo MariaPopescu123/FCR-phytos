@@ -8,7 +8,7 @@ pacman::p_load(tidyverse, lubridate, data.table,zoo)
 rm(list=ls())
 
 #read in sample dates and depths of phyto samples
-sample_info <- read_csv("./0_Data_files/EDI_phytos/phytoplankton.csv") %>%
+sample_info <- read_csv("./0_Data_files/phytoplankton.csv") %>%
   select(Date, Depth_m) %>%
   distinct()
 sample_info$number <- 1:100
@@ -16,7 +16,7 @@ sample_info$number <- 1:100
 #read in FP data so can match temp profiles to hour FP profiles were taken
 replacement_dates <- as.Date(c("2016-07-12","2018-05-24","2019-07-03","2019-07-11","2019-07-18","2019-10-22"))
 
-fp_sample <- read_csv("./0_Data_files/FP.csv")%>%
+fp_sample <- read.csv("./0_Data_files/FP.csv")%>%
   mutate(Date = date(DateTime),
          Hour = hour(DateTime)) %>%
   filter(Reservoir == "FCR" & Site == 50) %>%
@@ -117,7 +117,7 @@ for (i in 1:length(ctd_dates)){
               pH = mean(pH, na.rm = TRUE))
   final <- bind_rows(final, ctd_profile)
 }
-final[NaN]<-NA
+#final[NaN]<-NA
 
 final <- bind_cols(final, pz_sample$pz_depth_m_interp)
 
@@ -126,7 +126,7 @@ CTD_pz_vars <- final %>%
 colnames(CTD_pz_vars)<- c("Date","pz_Temp_C","pz_DO_mgL","pz_pH","Interp_pz_depth_m")
 
 #read in YSI data and limit to temperature, DO, pH
-ysi <- read_csv("./0_Data_files/YSI.csv") %>%
+ysi <- read.csv("./0_Data_files/YSI.csv") %>%
   select(Reservoir, Site, DateTime, Depth_m, Temp_C, DO_mgL, pH) %>%
   mutate(Date = as.POSIXct(DateTime, format = "%m/%d/%y %H:%M")) %>%
   select(-DateTime)%>%
@@ -255,6 +255,9 @@ colnames(scc_pz_vars)<- c("Date","pz_Temp_C")
 Tmetrics <- data.frame(sample_info$Date)
 colnames(Tmetrics) <- "Date"
 
+Tmetrics$Date <- as.Date(Tmetrics$Date)
+CTD_pz_vars$Date <- as.Date(CTD_pz_vars$Date)
+
 Tmetrics1 <- left_join(Tmetrics, CTD_pz_vars, by = "Date")  
 colnames(Tmetrics1)[2:5] <- paste("CTD", colnames(Tmetrics1)[2:5], sep = "_")
 Tmetrics2 <- left_join(Tmetrics1, ysi_pz_vars, by = "Date")
@@ -265,3 +268,4 @@ colnames(Tmetrics3)[9] <- paste("SCC", colnames(Tmetrics3)[9], sep = "_")
 
 
 write.csv(Tmetrics3,"./0_Data_files/pz_WtrTemp_DO_pH.csv",row.names = FALSE)
+

@@ -156,7 +156,7 @@ p1 <- ggplot(dat5, aes(x = Date, y = rel_abund_group, group = Phyto_group, color
   ylab("Relative abundance")+
   labs(fill = "Phytoplankton group", color = "Phytoplankton group")+
   theme_classic()
-ggsave(plot = p1, filename = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/relabund.png",
+ggsave(plot = p1, filename = "C:/Users/mariapopescu100/Documents/FCR-phytos/relabund.png",
        device = "png",height = 4, width = 7, units = "in")
 
 #plot total biovolume over time
@@ -167,7 +167,7 @@ p2 <- ggplot(dat5, aes(x = Date, y = BV_TOTAL)) +
   ylab(expression(paste("Biovolume ","(",mu,m^3,~mL^-1,")")))+
   theme_classic()
 p2
-ggsave(plot = p2, filename = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/BV.png",
+ggsave(plot = p2, filename = "C:/Users/mariapopescu100/Documents/FCR-phytos/BV.png",
        device = "png",height = 2.5, width = 6, units = "in")
 
 #further visualization
@@ -234,6 +234,7 @@ ggplot(data = cs, aes(x = Date, y = rel_abund_Chlorophytes))+
   geom_line(size = 1)+
   theme_classic()
 
+
 ggplot(data = cs, aes(x = Date, y = rel_abund_Chrysophytes))+
   facet_wrap(vars(Year), scales = "free_x")+
   geom_line(size = 1)+
@@ -243,6 +244,10 @@ ggplot(data = cs, aes(x = Date, y = rel_abund_Cryptophytes))+
   facet_wrap(vars(Year), scales = "free_x")+
   geom_line(size = 1)+
   theme_classic()
+
+
+
+
 
 ggplot(data = cs, aes(x = Date, y = rel_abund_Cyanobacteria))+
   facet_wrap(vars(Year), scales = "free_x")+
@@ -277,7 +282,7 @@ cs1 <- cs %>%
 yrs <- unique(cs1$Year)
 cs_metrics <- unique(cs1$cs_metric)
 
-png(file = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/CS_pacf1.png",width = 36, height = 16,
+png(file = "C:/Users/mariapopescu100/Documents/FCR-phytos/CS_pacf1.png",width = 36, height = 16,
     units = "cm",res = 300)
 par(mfrow = c(4,8), mgp = c(2,0.5,0),mar = c(4,3,3,1))
 
@@ -309,7 +314,7 @@ cs2 <- cs %>%
 yrs <- unique(cs2$Year)
 cs_metrics <- unique(cs2$cs_metric)
 
-png(file = "C:/Users/Mary Lofton/Dropbox/Ch_2/Exploratory_viz/CS_pacf2.png",width = 36, height = 16,
+png(file = "C:/Users/mariapopescu100/Documents/FCR-phytos/CS_pacf2.png",width = 36, height = 16,
     units = "cm",res = 300)
 par(mfrow = c(4,7), mgp = c(2,0.5,0),mar = c(4,3,3,1))
 

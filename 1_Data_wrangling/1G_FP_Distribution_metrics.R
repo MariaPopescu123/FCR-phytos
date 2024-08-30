@@ -9,13 +9,13 @@ pacman::p_load(tidyverse, lubridate)
 rm(list=ls())
 
 #read in sample dates and depths of phyto samples
-sample_info <- read_csv("./0_Data_files/EDI_phytos/phytoplankton.csv") %>%
+sample_info <- read_csv("./0_Data_files/phytoplankton.csv") %>%
   select(Date, Depth_m) %>%
   distinct()
 sample_info$number <- 1:100
 
 #load fp data to get biomass value
-fp <- read_csv("./0_Data_files/FP.csv")%>%
+fp <- read.csv("./0_Data_files/FP.csv")%>%
   mutate(Date = date(DateTime),
          Hour = hour(DateTime)) %>%
   filter(Reservoir == "FCR" & Site == 50 & date(DateTime) %in% sample_info$Date) 
@@ -35,7 +35,7 @@ replacement_dates <- as.Date(c("2016-07-12","2018-05-24","2019-07-03","2019-07-1
 
 
 #pull individual depth sample information and clean profiles
-fp_sample <- read_csv("./0_Data_files/FP.csv")%>%
+fp_sample <- read.csv("./0_Data_files/FP.csv")%>%
   mutate(Date = date(DateTime),
          Hour = hour(DateTime)) %>%
   filter(Reservoir == "FCR" & Site == 50) %>%

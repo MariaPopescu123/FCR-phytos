@@ -10,11 +10,12 @@ pacman::p_load(tidyverse, lubridate, zoo)
 rm(list=ls())
 
 #read in sample dates and depths of phyto samples
-sample_info <- read_csv("./0_Data_files/EDI_phytos/phytoplankton.csv") %>%
+sample_info <- read_csv("./0_Data_files/phytoplankton.csv") %>%
   select(Date, Depth_m) %>%
   distinct()
 sample_info$number <- 1:100
 
+#does not exist
 cmax <- read_csv("./0_Data_files/FP_DistributionMetrics.csv") %>%
   select(Date, Peak_depth_m)
 
