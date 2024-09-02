@@ -40,7 +40,7 @@ d <- mydata %>% filter(Year %in% c(2016:2017))
 driver_cor <- cor(d[,c(41,14,16,18,29:33,35,38)],method = "spearman",use = "pairwise.complete.obs")
 driver_cor[lower.tri(driver_cor)] = ""
 write.csv(driver_cor, file = "./2_Data_analysis/PD_driver_cor_man.csv", row.names = FALSE)
-#use Kd
+#use Kd (not really sure why)
 
 mydata1 <- mydata %>%
   filter(Year %in% c(2016:2017)) %>%
@@ -142,6 +142,7 @@ mydata1 <- mydata %>%
   select(Max_biomass_ugL,Temp_C_Cmax,Cmax_DOC_mgL,schmidt.stability,n2)
 response_cor <- cor(mydata1,method = "spearman",use = "pairwise.complete.obs")
 response_cor[lower.tri(response_cor)] = ""
+
 #use Temp_C_Cmax
 #schmidt.stability and n2 about the same so going w/ n2 based on whole timeseries
 

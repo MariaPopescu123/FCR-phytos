@@ -30,3 +30,4 @@ ggplot(data = inf, aes(x = Date, y = WRT_day))+
   theme_classic()
 
 write.csv(inf, "./0_Data_files/WRT.csv",row.names = FALSE)
+

@@ -14,6 +14,7 @@ hoxem <- read_csv("./0_Data_files/HOX_EM_operation.csv") %>%
   mutate(Year = year(Date))
 
 #chemistry
+
 chem <- read_csv("./0_Data_files/chem_vars.csv") %>%
   mutate(Year = year(Date))
 
@@ -180,3 +181,4 @@ colnames(mega13)
 
 #write megamatrix for phyto comm structure ARIMAs to file
 write.csv(mega13, "./2_Data_analysis/CS_megamatrix.csv",row.names = FALSE)
+
