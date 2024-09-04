@@ -8,7 +8,7 @@ pacman::p_load(tidyverse, lubridate, data.table,zoo)
 rm(list=ls())
 
 #read in sample dates and depths of phyto samples
-sample_info <- read_csv("./0_Data_files/phytoplankton.csv") %>%
+sample_info <- read.csv("./0_Data_files/phytoplankton.csv") %>%
   select(Date, Depth_m) %>%
   distinct()
 sample_info$number <- 1:100
@@ -123,6 +123,7 @@ final <- bind_cols(final, pz_sample$pz_depth_m_interp)
 
 CTD_pz_vars <- final %>%
   select(-Depth_m,-Hour,-Reservoir,-Site)
+
 colnames(CTD_pz_vars)<- c("Date","pz_Temp_C","pz_DO_mgL","pz_pH","Interp_pz_depth_m")
 
 #read in YSI data and limit to temperature, DO, pH
